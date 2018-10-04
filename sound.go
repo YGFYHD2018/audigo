@@ -1,7 +1,6 @@
 package audigo
 
 import (
-	"context"
 	"os"
 	"sync"
 	"time"
@@ -34,30 +33,33 @@ type Player struct {
 	buf     []byte
 	player  *oto.Player
 
-	ctx context.Context
+	// ctx context.Context
+	done *util.Closing
 }
 
 func NewPlayer() *Player {
-	p := new(Player)
-	p.ctx = context.Background()
+	p := &Player{}
+	// p.ctx = context.Background()
+	p.done = util.NewClosing()
 	return p
 }
 
 func (p *Player) Play(file string, loop int) {
+	// open file
 	playing := make(chan struct{})
 	f, err := os.Open(dir + file)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-
+	// decode file
 	ssc, format, err := wav.Decode(f)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 	defer ssc.Close()
-
+	// set middleware
 	l := beep.Loop(loop, ssc)
 	s := beep.Seq(l, beep.Callback(func() {
 		close(playing)
@@ -65,7 +67,7 @@ func (p *Player) Play(file string, loop int) {
 	p.ctrl = *(&beep.Ctrl{Streamer: s})
 	p.vol = *(&effects.Volume{Streamer: &p.ctrl, Base: 1.2, Volume: 1})
 	stm := &p.vol
-
+	// play sound
 	p.set(format.SampleRate, format.SampleRate.N(time.Second/10))
 	p.mixer = beep.Mixer{}
 	p.mixer.Play(stm)
@@ -73,16 +75,7 @@ func (p *Player) Play(file string, loop int) {
 }
 
 func (p *Player) Stop() {
-	if isDone(p.ctx) {
-		// 既にクローズしている
-	} else {
-		_, cancel := context.WithCancel(p.ctx)
-		log.Debug("1")
-		cancel()
-		log.Debug("2")
-		p.player.Close()
-		log.Debug("3")
-	}
+	p.done.Close()
 }
 
 func (p *Player) set(sampleRate beep.SampleRate, bufferSize int) error {
@@ -98,17 +91,17 @@ func (p *Player) set(sampleRate beep.SampleRate, bufferSize int) error {
 	p.samples = make([][2]float64, bufferSize)
 	p.buf = make([]byte, bufferNum)
 
-	go func() {
+	go func(done <-chan bool) {
 		for {
 			select {
-			case <-p.ctx.Done():
+			case <-done:
 				log.Info("closing player")
 				return
 			default:
 				p.sampling()
 			}
 		}
-	}()
+	}(p.done.GetDone())
 	return nil
 }
 
@@ -141,12 +134,3 @@ func (p *Player) sampling() {
 // 	pos := strings.LastIndex(file, ".")
 // 	return file[pos:]
 // }
-
-func isDone(ctx context.Context) bool {
-	select {
-	case <-ctx.Done():
-		return true
-	default:
-		return false
-	}
-}

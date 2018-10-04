@@ -45,19 +45,22 @@ func newLogger() Log {
 		zapcore.AddSync(os.Stdout),
 		zapcore.DebugLevel,
 	)
+	// file := newFileLogger("/log/audigo.log", conf)
+	l := zap.New(zapcore.NewTee(
+		console,
+		// file,
+	))
+	return &logger{l}
+}
 
-	f, _ := os.Create("/log/audigo.log")
-	file := zapcore.NewCore(
+func newFileLogger(path string, conf zapcore.EncoderConfig) zapcore.Core {
+	f, _ := os.Create(path)
+	fileCore := zapcore.NewCore(
 		zapcore.NewJSONEncoder(conf),
 		zapcore.AddSync(f),
 		zapcore.InfoLevel,
 	)
-
-	l := zap.New(zapcore.NewTee(
-		console,
-		file,
-	))
-	return &logger{l}
+	return fileCore
 }
 
 func GetLogger() Log {

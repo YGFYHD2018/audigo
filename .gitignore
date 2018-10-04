@@ -1,2 +1,5 @@
 /vendor/*
 /.vscode/*
+
+trace.out
+/doc/logic.pu
