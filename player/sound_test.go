@@ -1,4 +1,4 @@
-package audigo_test
+package player_test
 
 import (
 	"math"

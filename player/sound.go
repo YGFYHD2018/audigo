@@ -1,4 +1,4 @@
-package audigo
+package player
 
 import (
 	"os"
