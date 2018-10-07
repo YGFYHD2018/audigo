@@ -8,23 +8,21 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+var (
+	instance = newLogger()
+)
+
 type Log interface {
 	Debug(...interface{}) string
 	Info(...interface{}) string
 	Warn(...interface{}) string
 	Error(...interface{}) string
 	Fatal(...interface{}) string
-
-	Errorf(string, ...interface{}) string
 }
 
 type logger struct {
-	l *zap.Logger
+	zap *zap.Logger
 }
-
-var (
-	instance = newLogger()
-)
 
 func newLogger() Log {
 	conf := zapcore.EncoderConfig{
@@ -45,10 +43,10 @@ func newLogger() Log {
 		zapcore.AddSync(os.Stdout),
 		zapcore.DebugLevel,
 	)
-	// file := newFileLogger("/log/audigo.log", conf)
+	file := newFileLogger("log/audigo.log", conf)
 	l := zap.New(zapcore.NewTee(
 		console,
-		// file,
+		file,
 	))
 	return &logger{l}
 }
@@ -68,30 +66,26 @@ func GetLogger() Log {
 }
 
 func (l *logger) Debug(v ...interface{}) string {
-	l.l.Debug(fmt.Sprintln(v...))
+	l.zap.Debug(fmt.Sprintln(v...))
 	return ""
 }
 
 func (l *logger) Info(v ...interface{}) string {
-	l.l.Info(fmt.Sprintln(v...))
+	l.zap.Info(fmt.Sprintln(v...))
 	return ""
 }
 
 func (l *logger) Warn(v ...interface{}) string {
-	l.l.Warn(fmt.Sprintln(v...))
+	l.zap.Warn(fmt.Sprintln(v...))
 	return ""
 }
 
 func (l *logger) Error(v ...interface{}) string {
-	l.l.Error(fmt.Sprintln(v...))
+	l.zap.Error(fmt.Sprintln(v...))
 	return ""
 }
 
 func (l *logger) Fatal(v ...interface{}) string {
-	l.l.Fatal(fmt.Sprintln(v...))
+	l.zap.Fatal(fmt.Sprintln(v...))
 	return ""
-}
-
-func (l *logger) Errorf(format string, v ...interface{}) string {
-	return l.Error(fmt.Sprintf(format, v...))
 }

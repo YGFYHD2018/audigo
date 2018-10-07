@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"flag"
@@ -6,10 +6,10 @@ import (
 	"github.com/code560/audigo/net"
 )
 
-func main() {
+func Serve() {
 	flag.Parse()
 	port := flag.Arg(0)
 
-	r := net.NewRouter(port)
-	r.Run()
+	r := net.NewRouter()
+	r.Run(port)
 }

@@ -1,6 +1,7 @@
 package player
 
 import (
+	"math"
 	"os"
 	"sync"
 	"time"
@@ -15,62 +16,62 @@ import (
 )
 
 var (
-	dir string
 	mtx sync.Mutex
 	log = util.GetLogger()
 )
 
-func init() {
-	dir = "assets/audio/"
-}
+const (
+	CH  = 2
+	BPS = 2
+	// TODO マジックナンバー撲滅活動
+)
 
 type Player struct {
-	ctrl beep.Ctrl
-	vol  effects.Volume
+	ctrl *beep.Ctrl
+	vol  *effects.Volume
 
 	mixer   beep.Mixer
-	samples [][2]float64
+	samples [][CH]float64
 	buf     []byte
 	player  *oto.Player
 
-	// ctx context.Context
 	done *util.Closing
 }
 
 func NewPlayer() *Player {
 	p := &Player{}
-	// p.ctx = context.Background()
 	p.done = util.NewClosing()
 	return p
 }
 
-func (p *Player) Play(file string, loop int) {
+func (p *Player) Play(args *PlayArgs) {
 	// open file
 	playing := make(chan struct{})
-	f, err := os.Open(dir + file)
+	f, err := os.Open(args.wav)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 	// decode file
-	ssc, format, err := wav.Decode(f)
+	sc, format, err := wav.Decode(f)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	defer ssc.Close()
+	defer sc.Close()
+
 	// set middleware
-	l := beep.Loop(loop, ssc)
-	s := beep.Seq(l, beep.Callback(func() {
+	s := beep.Loop(loopCount(args.loop), sc)
+	s = beep.Seq(s, beep.Callback(func() {
 		close(playing)
 	}))
-	p.ctrl = *(&beep.Ctrl{Streamer: s})
-	p.vol = *(&effects.Volume{Streamer: &p.ctrl, Base: 1.2, Volume: 1})
-	stm := &p.vol
+	p.ctrl = &beep.Ctrl{Streamer: s}
+	p.vol = &effects.Volume{Streamer: p.ctrl, Base: 1.2, Volume: 1}
+	s = p.vol
 	// play sound
 	p.set(format.SampleRate, format.SampleRate.N(time.Second/10))
 	p.mixer = beep.Mixer{}
-	p.mixer.Play(stm)
+	p.mixer.Play(s)
 	<-playing
 }
 
@@ -79,11 +80,10 @@ func (p *Player) Stop() {
 }
 
 func (p *Player) set(sampleRate beep.SampleRate, bufferSize int) error {
-	bufferNum := bufferSize * 4
-
 	var err error
+	bufferNum := bufferSize * CH * BPS
 	mtx.Lock()
-	p.player, err = oto.NewPlayer(int(sampleRate), 2, 2, bufferNum)
+	p.player, err = oto.NewPlayer(int(sampleRate), CH, BPS, bufferNum)
 	mtx.Unlock()
 	if err != nil {
 		return errors.Wrap(err, log.Error("failed to initialize oto.Player"))
@@ -106,31 +106,33 @@ func (p *Player) set(sampleRate beep.SampleRate, bufferSize int) error {
 }
 
 func (p *Player) sampling() {
-	mtx.Lock()
+	// mtx.Lock()
 	p.mixer.Stream(p.samples)
-	mtx.Unlock()
+	// mtx.Unlock()
 
-	for i := range p.samples {
-		for c := range p.samples[i] {
-			val := p.samples[i][c]
+	for s := range p.samples {
+		for rl := range p.samples[s] {
+			val := p.samples[s][rl]
 			if val < -1 {
 				val = -1
 			}
 			if val > +1 {
 				val = +1
 			}
-			valInt16 := int16(val * (1<<15 - 1))
-			low := byte(valInt16)
-			high := byte(valInt16 >> 8)
-			p.buf[i*4+c*2+0] = low
-			p.buf[i*4+c*2+1] = high
+			i16 := int16(val * (1<<15 - 1))
+			l := byte(i16)
+			h := byte(i16 >> 8)
+			p.buf[s*4+rl*2+0] = l
+			p.buf[s*4+rl*2+1] = h
 		}
 	}
-
 	p.player.Write(p.buf)
 }
 
-// func ext(file string) string {
-// 	pos := strings.LastIndex(file, ".")
-// 	return file[pos:]
-// }
+func loopCount(enable bool) int {
+	if enable {
+		return math.MaxInt64
+	} else {
+		return 1
+	}
+}

@@ -1,19 +1,19 @@
-package main
+package app
 
 import (
 	"flag"
-	"math"
 	"os"
 	"runtime/trace"
+	"sync"
 	"time"
 
-	"github.com/code560/audigo"
+	"github.com/code560/audigo/player"
 	"github.com/code560/audigo/util"
 )
 
-var l = util.GetLogger()
+var log = util.GetLogger()
 
-func main() {
+func SoundPlay() {
 	flag.Parse()
 	args := flag.Args()
 	if len(args) == 0 {
@@ -23,32 +23,38 @@ func main() {
 	// trace
 	f, err := os.Create("trace.out")
 	if err != nil {
-		l.Fatal(err)
+		log.Fatal(err)
 	}
 	defer f.Close()
 	trace.Start(f)
 	defer trace.Stop()
 	// trace end
 
-	plist := make([]*audigo.Player, len(args))
-	for i, arg := range args {
-		p := audigo.NewPlayer()
-		// l.Debug("make player: %p", p)
-		// plist = append(plist, p)
+	w := sync.WaitGroup{}
+	_ = playFiles(args, &w)
+	w.Wait()
+}
+
+func playFiles(files []string, w *sync.WaitGroup) []*player.Player {
+	plist := make([]*player.Player, len(files))
+	for i, arg := range files {
+		p := player.NewPlayer()
 		plist[i] = p
 
-		go func(p *audigo.Player, name string) {
-			p.Play(name, math.MaxInt64)
+		w.Add(1)
+		go func(p *player.Player, name string) {
+			p.Play(player.NewPlayArgs(
+				player.Wave(name),
+				player.Loop(false)))
+			w.Done()
 		}(p, arg)
 	}
+	return plist
+}
 
-	// l.Debug("started wav")
+func stopPlayers(plist []*player.Player) {
 	time.Sleep(time.Second * 2)
 	for _, p := range plist {
-		// l.Debug("call stop")
-		// l.Debug("player: %p", p)
 		p.Stop()
 	}
-
-	// l.Debug("done routines")
 }

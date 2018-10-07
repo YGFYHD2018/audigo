@@ -2,6 +2,7 @@ package net
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sync"
 
@@ -14,8 +15,12 @@ var (
 	h    = newHandler()
 )
 
+const (
+	INIT_PLAYER_COUNT = 10
+)
+
 type handler struct {
-	players map[string]*Proxy
+	players map[string]*player.Proxy
 }
 
 // SetHandler は、ginにapiハンドラーを設定します。
@@ -40,7 +45,7 @@ func newHandler() *handler {
 	var inst *handler
 	once.Do(func() {
 		inst = &handler{
-			players: make(map[string]*Proxy, 10),
+			players: make(map[string]*player.Proxy, INIT_PLAYER_COUNT), // TODO
 		}
 	})
 	return inst
@@ -74,70 +79,70 @@ func (h *handler) ids(c *gin.Context) {
 
 func (h *handler) play(c *gin.Context) {
 	code := http.StatusAccepted
-	id := c.Param("content_id")
-	p, ok := h.players[id]
-	if !ok {
-		c.JSON(http.StatusNotFound, id)
+	p, err := h.getPlayer(c)
+	if err != nil {
 		return
 	}
-	args := playArgs{}
+	args := player.PlayArgs{}
 	if err := c.ShouldBindJSON(args); err != nil {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	p.play <- args
+	p.Play <- args
 	c.JSON(code, nil)
 }
 
 func (h *handler) stop(c *gin.Context) {
 	code := http.StatusAccepted
-	id := c.Param("content_id")
-	p, ok := h.players[id]
-	if !ok {
-		c.JSON(http.StatusNotFound, id)
+	p, err := h.getPlayer(c)
+	if err != nil {
 		return
 	}
-	p.stop <- struct{}{}
+	p.Stop <- struct{}{}
 	c.JSON(code, nil)
 }
 
 func (h *handler) volume(c *gin.Context) {
 	code := http.StatusAccepted
-	id := c.Param("content_id")
-	p, ok := h.players[id]
-	if !ok {
-		c.JSON(http.StatusNotFound, id)
+	p, err := h.getPlayer(c)
+	if err != nil {
 		return
 	}
-	args := volumeArgs{}
+	args := player.VolumeArgs{}
 	if err := c.ShouldBindJSON(args); err != nil {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	p.volume <- args
+	p.Volume <- args
 	c.JSON(code, nil)
 }
 
 func (h *handler) pause(c *gin.Context) {
 	code := http.StatusAccepted
-	id := c.Param("content_id")
-	p, ok := h.players[id]
-	if !ok {
-		c.JSON(http.StatusNotFound, id)
+	p, err := h.getPlayer(c)
+	if err != nil {
 		return
 	}
-	p.pause <- struct{}{}
+	p.Pause <- struct{}{}
 	c.JSON(code, nil)
 }
 
 func (h *handler) resume(c *gin.Context) {
 	code := http.StatusAccepted
+	p, err := h.getPlayer(c)
+	if err != nil {
+		return
+	}
+	p.Resume <- struct{}{}
+	c.JSON(code, nil)
+}
+
+func (h *handler) getPlayer(c *gin.Context) (*player.Proxy, error) {
 	id := c.Param("content_id")
 	p, ok := h.players[id]
 	if !ok {
 		c.JSON(http.StatusNotFound, id)
-		return
+		return nil, fmt.Errorf("not found id player: %s", id)
 	}
-	p.resume <- struct{}{}
-	c.JSON(code, nil)
+	return p, nil
 }

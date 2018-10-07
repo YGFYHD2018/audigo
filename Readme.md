@@ -1,22 +1,18 @@
 # audigo
 3D Led CubeのPCレス用音響サービス  
+(作成中)  
 
 ## Usage
 ### Install
-'''sh  
-git clone <<audigo url>>
-cd audigo
-
-dep ensure
+'''
+git clone <<audigo url>>  
+cd audigo  
+  
+dep ensure  
 '''  
 
 ### Run
-'''sh  
-'''  
-
-#### Windows
-'''sh  
-audigo.exe 8888
+'''
 '''  
 
 コマンドの第一引数にポート番号を指定する。  

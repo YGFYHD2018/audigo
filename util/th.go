@@ -20,7 +20,7 @@ func recove(f func() error) error {
 	log := GetLogger()
 	defer func() error {
 		if r := recover(); r != nil {
-			log.Errorf("recorvered from %s", r)
+			log.Error("recorvered from %s", r)
 			return fmt.Errorf("error %s", r)
 		}
 		return nil
@@ -35,35 +35,21 @@ type Closing struct {
 }
 
 func NewClosing() *Closing {
-	// log := GetLogger()
 	muClosing.Lock()
 	defer muClosing.Unlock()
 	c := &Closing{
-		Done: make(chan bool, 1),
+		Done: make(chan bool),
 	}
-	// log.Debug("make closing: %p", c)
-	// log.Debug("make chan(Done): %p", c.Done)
 	return c
 }
 
 func (c *Closing) Close() {
-	// log := GetLogger()
 	muClosing.Lock()
 	defer muClosing.Unlock()
 
-	// log.Debug("closing: %p", c)
-	// log.Debug("chan(Done): %p", c.Done)
 	if !isDone(c.Done) {
 		close(c.Done)
 	}
-
-	// recove(func() error {
-	// 	log.Debug("make chan(Done): %p", c.Done)
-	// 	if !isDone(c.Done) {
-	// 		close(c.Done)
-	// 	}
-	// 	return nil
-	// }) // TODO: 握りつぶし、そのうち対応
 }
 
 func (c *Closing) GetDone() <-chan bool {

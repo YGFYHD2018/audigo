@@ -1,17 +1,11 @@
-package player_test
+package player
 
 import (
-	"math"
 	"os"
 	"runtime/trace"
 	"testing"
 	"time"
-
-	"github.com/code560/audigo"
-	"github.com/code560/audigo/util"
 )
-
-var l = util.GetLogger()
 
 func TestSound(t *testing.T) {
 	args := []string{
@@ -22,28 +16,33 @@ func TestSound(t *testing.T) {
 	// trace
 	f, err := os.Create("trace.out")
 	if err != nil {
-		l.Fatal(err)
+		log.Fatal(err)
 	}
 	defer f.Close()
 	trace.Start(f)
 	defer trace.Stop()
 	// trace end
 
-	plist := make([]audigo.Player, len(args))
-	for _, arg := range args {
-		p := audigo.NewPlayer()
-		plist = append(plist, *p)
-		go func(p *audigo.Player, name string) {
-			p.Play(name, math.MaxInt64)
+	plist := make([]*Player, len(args))
+	for i, arg := range args {
+		p := NewPlayer()
+		plist[i] = p
+
+		go func(p *Player, name string) {
+			p.Play(NewPlayArgs(
+				Wave(name),
+				Loop(true)))
 		}(p, arg)
 	}
 
-	l.Debug("started wav")
-	time.Sleep(time.Second * 2)
-	for _, p := range plist[0:] {
-		l.Debug("call stop")
+	log.Debug("plaing sound")
+
+	sec := time.Duration(2)
+	time.Sleep(time.Second * sec)
+	for _, p := range plist {
+		log.Debug("call stop sound")
 		p.Stop()
 	}
 
-	l.Debug("done routines")
+	log.Debug("done routines")
 }
