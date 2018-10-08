@@ -43,11 +43,16 @@ func NewClosing() *Closing {
 	return c
 }
 
+func (c *Closing) Reset() {
+	c.Close()
+	c.Done = make(chan bool)
+}
+
 func (c *Closing) Close() {
 	muClosing.Lock()
 	defer muClosing.Unlock()
 
-	if !isDone(c.Done) {
+	if !IsDone(c.Done) {
 		close(c.Done)
 	}
 }
@@ -56,7 +61,7 @@ func (c *Closing) GetDone() <-chan bool {
 	return c.Done
 }
 
-func isDone(c chan bool) bool {
+func IsDone(c chan bool) bool {
 	select {
 	case <-c:
 		return true

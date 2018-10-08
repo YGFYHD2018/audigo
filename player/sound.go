@@ -21,16 +21,20 @@ var (
 )
 
 const (
-	CH  = 2
-	BPS = 2
+	CH    = 2
+	BPS   = 2
+	CHUNK = 100
+
+	VOLUME_BASE = 1.2
+	VOLUME_INIT = 1
 	// TODO マジックナンバー撲滅活動
 )
 
 type Player struct {
-	ctrl *beep.Ctrl
-	vol  *effects.Volume
+	ctrl  *beep.Ctrl
+	vol   *effects.Volume
+	mixer beep.Mixer
 
-	mixer   beep.Mixer
 	samples [][CH]float64
 	buf     []byte
 	player  *oto.Player
@@ -38,48 +42,78 @@ type Player struct {
 	done *util.Closing
 }
 
-func NewPlayer() *Player {
-	p := &Player{}
-	p.done = util.NewClosing()
+func newPlayerImpl() *Player {
+	p := &Player{
+		ctrl:  &beep.Ctrl{},
+		vol:   &effects.Volume{Base: VOLUME_BASE, Volume: VOLUME_INIT},
+		mixer: beep.Mixer{},
+
+		done: util.NewClosing(),
+	}
 	return p
 }
 
 func (p *Player) Play(args *PlayArgs) {
 	// open file
-	playing := make(chan struct{})
 	f, err := os.Open(args.wav)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 	// decode file
-	sc, format, err := wav.Decode(f)
+	closer, format, err := wav.Decode(f)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	defer sc.Close()
+	defer closer.Close()
 
 	// set middleware
-	s := beep.Loop(loopCount(args.loop), sc)
+	s := p.setMiddleware(closer, args)
+	playing := make(chan struct{})
 	s = beep.Seq(s, beep.Callback(func() {
 		close(playing)
 	}))
-	p.ctrl = &beep.Ctrl{Streamer: s}
-	p.vol = &effects.Volume{Streamer: p.ctrl, Base: 1.2, Volume: 1}
-	s = p.vol
 	// play sound
-	p.set(format.SampleRate, format.SampleRate.N(time.Second/10))
-	p.mixer = beep.Mixer{}
+	p.setPlayer(format.SampleRate, format.SampleRate.N(time.Millisecond*CHUNK))
 	p.mixer.Play(s)
 	<-playing
+	p.done.Reset()
 }
 
-func (p *Player) Stop() {
+func (p *Player) Stop(callback chan bool) {
 	p.done.Close()
+	if callback != nil {
+		close(callback)
+	}
 }
 
-func (p *Player) set(sampleRate beep.SampleRate, bufferSize int) error {
+func (p *Player) Volume(vol float64) {
+	if vol == 0 {
+		p.vol.Silent = true
+		return
+	} else {
+		p.vol.Silent = false
+	}
+	p.vol.Volume = vol
+}
+
+func (p *Player) Pause() {
+	p.ctrl.Paused = true
+}
+
+func (p *Player) Resume() {
+	p.ctrl.Paused = false
+}
+
+func (p *Player) setMiddleware(closer beep.StreamSeekCloser, args *PlayArgs) beep.Streamer {
+	s := beep.Loop(loopCount(args.loop), closer)
+	p.ctrl.Streamer = s
+	p.vol.Streamer = p.ctrl
+	return p.vol
+}
+
+func (p *Player) setPlayer(sampleRate beep.SampleRate, bufferSize int) error {
 	var err error
 	bufferNum := bufferSize * CH * BPS
 	mtx.Lock()
@@ -88,7 +122,7 @@ func (p *Player) set(sampleRate beep.SampleRate, bufferSize int) error {
 	if err != nil {
 		return errors.Wrap(err, log.Error("failed to initialize oto.Player"))
 	}
-	p.samples = make([][2]float64, bufferSize)
+	p.samples = make([][CH]float64, bufferSize)
 	p.buf = make([]byte, bufferNum)
 
 	go func(done <-chan bool) {

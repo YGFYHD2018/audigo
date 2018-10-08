@@ -1,8 +1,6 @@
 package player
 
 import (
-	"os"
-	"runtime/trace"
 	"testing"
 	"time"
 )
@@ -13,19 +11,9 @@ func TestSound(t *testing.T) {
 		"se_jump.wav",
 	}
 
-	// trace
-	f, err := os.Create("trace.out")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	trace.Start(f)
-	defer trace.Stop()
-	// trace end
-
 	plist := make([]*Player, len(args))
 	for i, arg := range args {
-		p := NewPlayer()
+		p := newPlayerImpl()
 		plist[i] = p
 
 		go func(p *Player, name string) {
@@ -41,7 +29,7 @@ func TestSound(t *testing.T) {
 	time.Sleep(time.Second * sec)
 	for _, p := range plist {
 		log.Debug("call stop sound")
-		p.Stop()
+		p.Stop(nil)
 	}
 
 	log.Debug("done routines")

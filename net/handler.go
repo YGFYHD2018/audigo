@@ -43,11 +43,9 @@ func setV1(r *gin.Engine) {
 
 func newHandler() *handler {
 	var inst *handler
-	once.Do(func() {
-		inst = &handler{
-			players: make(map[string]*player.Proxy, INIT_PLAYER_COUNT), // TODO
-		}
-	})
+	inst = &handler{
+		players: make(map[string]*player.Proxy, INIT_PLAYER_COUNT), // TODO
+	}
 	return inst
 }
 
