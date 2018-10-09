@@ -11,12 +11,12 @@ func TestSound(t *testing.T) {
 		"se_jump.wav",
 	}
 
-	plist := make([]*Player, len(args))
+	plist := make([]*player, len(args))
 	for i, arg := range args {
 		p := newPlayerImpl()
 		plist[i] = p
 
-		go func(p *Player, name string) {
+		go func(p *player, name string) {
 			p.Play(NewPlayArgs(
 				Wave(name),
 				Loop(true)))

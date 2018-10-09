@@ -12,6 +12,6 @@ var execDir = path.Dir(os.Args[0])
 func main() {
 	os.Chdir(execDir)
 
-	// app.Serve()
-	app.SoundPlay()
+	app.Serve()
+	// app.SoundPlay()
 }

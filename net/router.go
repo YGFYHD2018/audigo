@@ -25,5 +25,6 @@ func NewRouter() Router {
 }
 
 func (r *router) Run(port string) {
-	r.Run(fmt.Sprintf(":%s", port))
+	log.Info("start listen: ", port)
+	r.router.Run(fmt.Sprintf(":%s", port))
 }

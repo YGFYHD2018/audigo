@@ -20,7 +20,7 @@ func recove(f func() error) error {
 	log := GetLogger()
 	defer func() error {
 		if r := recover(); r != nil {
-			log.Error("recorvered from %s", r)
+			log.Error("recorvered from ", r)
 			return fmt.Errorf("error %s", r)
 		}
 		return nil

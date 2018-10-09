@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sync"
 
 	"github.com/code560/audigo/player"
+	"github.com/code560/audigo/util"
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	once sync.Once
-	h    = newHandler()
+	handle = newHandler()
+	log    = util.GetLogger()
 )
 
 const (
@@ -29,15 +29,15 @@ func SetHandler(r *gin.Engine) {
 }
 
 func setV1(r *gin.Engine) {
-	v1 := r.Group("audigo/v1")
+	v1 := r.Group("audio/v1")
 	{
-		v1.GET("/players", h.ids)
-		v1.POST("/init:content_id", h.create)
-		v1.POST("/play:content_id", h.play)
-		v1.POST("/stop:content_id", h.stop)
-		v1.POST("/volume:content_id", h.volume)
-		v1.POST("/pause:content_id", h.pause)
-		v1.POST("/resume:content_id", h.resume)
+		v1.GET("/players", handle.ids)
+		v1.POST("/init:content_id", handle.create)
+		v1.POST("/play:content_id", handle.play)
+		v1.POST("/stop:content_id", handle.stop)
+		v1.POST("/volume:content_id", handle.volume)
+		v1.POST("/pause:content_id", handle.pause)
+		v1.POST("/resume:content_id", handle.resume)
 	}
 }
 
@@ -50,14 +50,24 @@ func newHandler() *handler {
 }
 
 func (h *handler) create(c *gin.Context) {
+	log.Info("call init rest-api audio module.\n", c)
 	code := http.StatusNoContent
-	id := c.Param("content_id")
-	_, ok := h.players[id]
-	if !ok {
-		h.players[id] = player.NewProxy()
-		code = http.StatusCreated
-	}
+	h.getPlayer(c.Param("content_id"), true)
+	code = http.StatusCreated
 	c.JSON(code, nil)
+}
+
+func (h *handler) getPlayer(id string, create bool) (*player.Proxy, error) {
+	p, ok := h.players[id]
+	if !ok {
+		if create {
+			p := player.NewProxy()
+			h.players[id] = p
+		} else {
+			return nil, fmt.Errorf("not found id player: %s", id)
+		}
+	}
+	return p, nil
 }
 
 func (h *handler) ids(c *gin.Context) {
@@ -76,23 +86,25 @@ func (h *handler) ids(c *gin.Context) {
 }
 
 func (h *handler) play(c *gin.Context) {
+	log.Info("call play rest-api audio module.\n", c)
 	code := http.StatusAccepted
-	p, err := h.getPlayer(c)
+	p, err := h.getPlayer(c.Param("content_id"), true)
 	if err != nil {
-		return
+		p = player.NewProxy()
 	}
 	args := player.PlayArgs{}
 	if err := c.ShouldBindJSON(args); err != nil {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	p.Play <- args
+	p.Play <- &args
 	c.JSON(code, nil)
 }
 
 func (h *handler) stop(c *gin.Context) {
+	log.Info("call stop rest-api audio module.\n", c)
 	code := http.StatusAccepted
-	p, err := h.getPlayer(c)
+	p, err := h.getPlayer(c.Param("content_id"), false)
 	if err != nil {
 		return
 	}
@@ -101,8 +113,9 @@ func (h *handler) stop(c *gin.Context) {
 }
 
 func (h *handler) volume(c *gin.Context) {
+	log.Info("call volume rest-api audio module.\n", c)
 	code := http.StatusAccepted
-	p, err := h.getPlayer(c)
+	p, err := h.getPlayer(c.Param("content_id"), true)
 	if err != nil {
 		return
 	}
@@ -111,13 +124,14 @@ func (h *handler) volume(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	p.Volume <- args
+	p.Volume <- &args
 	c.JSON(code, nil)
 }
 
 func (h *handler) pause(c *gin.Context) {
+	log.Info("call pause rest-api audio module.\n", c)
 	code := http.StatusAccepted
-	p, err := h.getPlayer(c)
+	p, err := h.getPlayer(c.Param("content_id"), true)
 	if err != nil {
 		return
 	}
@@ -126,21 +140,12 @@ func (h *handler) pause(c *gin.Context) {
 }
 
 func (h *handler) resume(c *gin.Context) {
+	log.Info("call resume rest-api audio module.\n", c)
 	code := http.StatusAccepted
-	p, err := h.getPlayer(c)
+	p, err := h.getPlayer(c.Param("content_id"), true)
 	if err != nil {
 		return
 	}
 	p.Resume <- struct{}{}
 	c.JSON(code, nil)
-}
-
-func (h *handler) getPlayer(c *gin.Context) (*player.Proxy, error) {
-	id := c.Param("content_id")
-	p, ok := h.players[id]
-	if !ok {
-		c.JSON(http.StatusNotFound, id)
-		return nil, fmt.Errorf("not found id player: %s", id)
-	}
-	return p, nil
 }

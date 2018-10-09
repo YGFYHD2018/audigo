@@ -14,7 +14,7 @@ type Proxy struct {
 
 	closing chan struct{}
 
-	players []*Player
+	players []*player
 }
 
 // NewProxy は、Playerを生成して返します。
@@ -30,7 +30,7 @@ func newProxyImpl() *Proxy {
 	}
 }
 
-func (proxy *Proxy) setPlayer(players []*Player) {
+func (proxy *Proxy) setPlayer(players []*player) {
 	proxy.stopall()
 	proxy.players = players
 	proxy.rechan()
@@ -53,7 +53,7 @@ func (proxy *Proxy) stopall() {
 	wg := sync.WaitGroup{}
 	for _, p := range proxy.players {
 		wg.Add(1)
-		go func(p *Player) {
+		go func(p *player) {
 			p.Stop(nil)
 			// TODO 終了待ち
 			wg.Done()

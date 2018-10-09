@@ -30,7 +30,7 @@ const (
 	// TODO マジックナンバー撲滅活動
 )
 
-type Player struct {
+type player struct {
 	ctrl  *beep.Ctrl
 	vol   *effects.Volume
 	mixer beep.Mixer
@@ -42,8 +42,8 @@ type Player struct {
 	done *util.Closing
 }
 
-func newPlayerImpl() *Player {
-	p := &Player{
+func newPlayerImpl() *player {
+	p := &player{
 		ctrl:  &beep.Ctrl{},
 		vol:   &effects.Volume{Base: VOLUME_BASE, Volume: VOLUME_INIT},
 		mixer: beep.Mixer{},
@@ -53,7 +53,7 @@ func newPlayerImpl() *Player {
 	return p
 }
 
-func (p *Player) Play(args *PlayArgs) {
+func (p *player) Play(args *PlayArgs) {
 	// open file
 	f, err := os.Open(args.wav)
 	if err != nil {
@@ -81,14 +81,14 @@ func (p *Player) Play(args *PlayArgs) {
 	p.done.Reset()
 }
 
-func (p *Player) Stop(callback chan bool) {
+func (p *player) Stop(callback chan bool) {
 	p.done.Close()
 	if callback != nil {
 		close(callback)
 	}
 }
 
-func (p *Player) Volume(vol float64) {
+func (p *player) Volume(vol float64) {
 	if vol == 0 {
 		p.vol.Silent = true
 		return
@@ -98,22 +98,22 @@ func (p *Player) Volume(vol float64) {
 	p.vol.Volume = vol
 }
 
-func (p *Player) Pause() {
+func (p *player) Pause() {
 	p.ctrl.Paused = true
 }
 
-func (p *Player) Resume() {
+func (p *player) Resume() {
 	p.ctrl.Paused = false
 }
 
-func (p *Player) setMiddleware(closer beep.StreamSeekCloser, args *PlayArgs) beep.Streamer {
+func (p *player) setMiddleware(closer beep.StreamSeekCloser, args *PlayArgs) beep.Streamer {
 	s := beep.Loop(loopCount(args.loop), closer)
 	p.ctrl.Streamer = s
 	p.vol.Streamer = p.ctrl
 	return p.vol
 }
 
-func (p *Player) setPlayer(sampleRate beep.SampleRate, bufferSize int) error {
+func (p *player) setPlayer(sampleRate beep.SampleRate, bufferSize int) error {
 	var err error
 	bufferNum := bufferSize * CH * BPS
 	mtx.Lock()
@@ -139,7 +139,7 @@ func (p *Player) setPlayer(sampleRate beep.SampleRate, bufferSize int) error {
 	return nil
 }
 
-func (p *Player) sampling() {
+func (p *player) sampling() {
 	// mtx.Lock()
 	p.mixer.Stream(p.samples)
 	// mtx.Unlock()
