@@ -4,28 +4,27 @@ import (
 	"sync"
 )
 
-type mpp map[*Proxy][]*player
-
 var (
 	playerPool sync.Pool
 	proxyPool  sync.Pool
-	xProxyMap  mpp
 )
 
 func NewProxy() *Proxy {
 	proxy := proxyPool.Get().(*Proxy)
 	player := playerPool.Get().(*player)
-	mapPlayer(proxy, player)
+	proxy.setPlayer(player)
 	return proxy
 }
 
-func init() {
-	initMap()
-	initPool()
+func CloseProxy(p *Proxy) {
+	if p.sp != nil {
+		playerPool.Put(p.sp)
+	}
+	proxyPool.Put(p)
 }
 
-func initMap() {
-	xProxyMap = make(mpp, 50)
+func init() {
+	initPool()
 }
 
 func initPool() {
@@ -40,17 +39,4 @@ func initPool() {
 			return newProxyImpl() // todo trans internal
 		},
 	}
-}
-
-func mapPlayer(proxy *Proxy, players ...*player) {
-	list := make([]*player, len(players))
-	for i, p := range players {
-		list[i] = p
-	}
-
-	already, ok := xProxyMap[proxy]
-	if ok {
-		list = append(already, list...)
-	}
-	xProxyMap[proxy] = list
 }

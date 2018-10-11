@@ -81,7 +81,10 @@ func (p *player) Play(args *PlayArgs) {
 	p.done.Reset()
 }
 
-func (p *player) Stop(callback chan bool) {
+func (p *player) Stop(callback chan<- struct{}) {
+	if p.done == nil {
+		return
+	}
 	p.done.Close()
 	if callback != nil {
 		close(callback)
@@ -125,7 +128,7 @@ func (p *player) setPlayer(sampleRate beep.SampleRate, bufferSize int) error {
 	p.samples = make([][CH]float64, bufferSize)
 	p.buf = make([]byte, bufferNum)
 
-	go func(done <-chan bool) {
+	go func(done <-chan struct{}) {
 		for {
 			select {
 			case <-done:

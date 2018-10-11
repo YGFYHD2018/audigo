@@ -56,7 +56,7 @@ func newFileLogger(path string, conf zapcore.EncoderConfig) zapcore.Core {
 	fileCore := zapcore.NewCore(
 		zapcore.NewJSONEncoder(conf),
 		zapcore.AddSync(f),
-		zapcore.InfoLevel,
+		zapcore.DebugLevel,
 	)
 	return fileCore
 }

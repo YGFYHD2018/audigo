@@ -31,8 +31,11 @@ func SoundPlay() {
 	// trace end
 
 	w := sync.WaitGroup{}
-	_ = playFiles(args, &w)
+	list := playFiles(args, &w)
 	w.Wait()
+
+	time.Sleep(time.Second * 3)
+	stopPlayers(list)
 }
 
 func playFiles(files []string, w *sync.WaitGroup) []*player.Proxy {
@@ -44,7 +47,7 @@ func playFiles(files []string, w *sync.WaitGroup) []*player.Proxy {
 		w.Add(1)
 		go func(p *player.Proxy, name string) {
 			p.Play <- player.NewPlayArgs(
-				player.Wave(name),
+				player.Src(name),
 				player.Loop(false))
 			w.Done()
 		}(p, arg)

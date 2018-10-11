@@ -7,16 +7,16 @@ type PlayArgs struct {
 }
 
 type VolumeArgs struct {
-	val float64
+	Vol float64
 }
 
 const (
-	dir = "assets/audio/"
+	dir = "asset/audio/"
 )
 
-type optPlay func(*PlayArgs)
+type OptPlay func(*PlayArgs)
 
-func NewPlayArgs(opts ...optPlay) *PlayArgs {
+func NewPlayArgs(opts ...OptPlay) *PlayArgs {
 	u := &PlayArgs{Src: "", Loop: false, Stop: false}
 	for _, opt := range opts {
 		opt(u)
@@ -24,19 +24,19 @@ func NewPlayArgs(opts ...optPlay) *PlayArgs {
 	return u
 }
 
-func Wave(name string) optPlay {
+func Src(name string) OptPlay {
 	return func(a *PlayArgs) {
 		a.Src = dir + name
 	}
 }
 
-func Loop(enable bool) optPlay {
+func Loop(enable bool) OptPlay {
 	return func(a *PlayArgs) {
 		a.Loop = enable
 	}
 }
 
-func Stop(enable bool) optPlay {
+func Stop(enable bool) OptPlay {
 	return func(a *PlayArgs) {
 		a.Stop = enable
 	}

@@ -31,37 +31,41 @@ func recove(f func() error) error {
 var muClosing sync.Mutex
 
 type Closing struct {
-	Done chan bool
+	done chan struct{}
 }
 
 func NewClosing() *Closing {
 	muClosing.Lock()
 	defer muClosing.Unlock()
 	c := &Closing{
-		Done: make(chan bool),
+		done: make(chan struct{}),
 	}
 	return c
 }
 
 func (c *Closing) Reset() {
 	c.Close()
-	c.Done = make(chan bool)
+	c.done = make(chan struct{})
 }
 
 func (c *Closing) Close() {
 	muClosing.Lock()
 	defer muClosing.Unlock()
 
-	if !IsDone(c.Done) {
-		close(c.Done)
+	if !IsDone(c.done) {
+		close(c.done)
 	}
 }
 
-func (c *Closing) GetDone() <-chan bool {
-	return c.Done
+func (c *Closing) GetDone() <-chan struct{} {
+	return c.done
 }
 
-func IsDone(c chan bool) bool {
+func (c *Closing) GetDo() chan<- struct{} {
+	return c.done
+}
+
+func IsDone(c <-chan struct{}) bool {
 	select {
 	case <-c:
 		return true

@@ -1,6 +1,7 @@
 package net
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -90,15 +91,24 @@ func (h *handler) ids(c *gin.Context) {
 func (h *handler) play(c *gin.Context) {
 	body, _ := ioutil.ReadAll(c.Request.Body)
 	log.Info("call play rest-api audio module.\n", c.Request.Header, "\n", string(body))
+	c.Request.Body = ioutil.NopCloser(bytes.NewReader(body))
+	// create args
 	code := http.StatusAccepted
 	p, _ := h.getPlayer(c.Param("content_id"), true)
 	var args player.PlayArgs
-	if err := c.BindJSON(&args); err != nil {
-		log.Error("Json binded error: ", err)
+	if err := c.ShouldBindJSON(&args); err != nil {
+		log.Error("Json binded error: ", err.Error())
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	p.Play <- &args
+	player.Src(args.Src)(&args)
+	// send
+	select {
+	case p.Play <- &args:
+		break
+	default:
+		log.Error("dont send player chan: play")
+	}
 	c.JSON(code, nil)
 }
 
