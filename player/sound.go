@@ -55,7 +55,7 @@ func newPlayerImpl() *player {
 
 func (p *player) Play(args *PlayArgs) {
 	// open file
-	f, err := os.Open(args.wav)
+	f, err := os.Open(args.Src)
 	if err != nil {
 		log.Error(err)
 		return
@@ -107,7 +107,7 @@ func (p *player) Resume() {
 }
 
 func (p *player) setMiddleware(closer beep.StreamSeekCloser, args *PlayArgs) beep.Streamer {
-	s := beep.Loop(loopCount(args.loop), closer)
+	s := beep.Loop(loopCount(args.Loop), closer)
 	p.ctrl.Streamer = s
 	p.vol.Streamer = p.ctrl
 	return p.vol

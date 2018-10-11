@@ -3,6 +3,7 @@ package net
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/code560/audigo/player"
@@ -31,13 +32,14 @@ func SetHandler(r *gin.Engine) {
 func setV1(r *gin.Engine) {
 	v1 := r.Group("audio/v1")
 	{
+		v1.GET("/ping", func(c *gin.Context) { c.String(200, "pong") })
 		v1.GET("/players", handle.ids)
-		v1.POST("/init:content_id", handle.create)
-		v1.POST("/play:content_id", handle.play)
-		v1.POST("/stop:content_id", handle.stop)
-		v1.POST("/volume:content_id", handle.volume)
-		v1.POST("/pause:content_id", handle.pause)
-		v1.POST("/resume:content_id", handle.resume)
+		v1.POST("/init/:content_id", handle.create)
+		v1.POST("/play/:content_id", handle.play)
+		v1.POST("/stop/:content_id", handle.stop)
+		v1.POST("/volume/:content_id", handle.volume)
+		v1.POST("/pause/:content_id", handle.pause)
+		v1.POST("/resume/:content_id", handle.resume)
 	}
 }
 
@@ -61,7 +63,7 @@ func (h *handler) getPlayer(id string, create bool) (*player.Proxy, error) {
 	p, ok := h.players[id]
 	if !ok {
 		if create {
-			p := player.NewProxy()
+			p = player.NewProxy()
 			h.players[id] = p
 		} else {
 			return nil, fmt.Errorf("not found id player: %s", id)
@@ -86,14 +88,13 @@ func (h *handler) ids(c *gin.Context) {
 }
 
 func (h *handler) play(c *gin.Context) {
-	log.Info("call play rest-api audio module.\n", c)
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	log.Info("call play rest-api audio module.\n", c.Request.Header, "\n", string(body))
 	code := http.StatusAccepted
-	p, err := h.getPlayer(c.Param("content_id"), true)
-	if err != nil {
-		p = player.NewProxy()
-	}
-	args := player.PlayArgs{}
-	if err := c.ShouldBindJSON(args); err != nil {
+	p, _ := h.getPlayer(c.Param("content_id"), true)
+	var args player.PlayArgs
+	if err := c.BindJSON(&args); err != nil {
+		log.Error("Json binded error: ", err)
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}

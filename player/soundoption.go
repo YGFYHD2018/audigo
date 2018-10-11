@@ -1,9 +1,9 @@
 package player
 
 type PlayArgs struct {
-	wav  string
-	loop bool
-	stop bool
+	Src  string `json:"src"`
+	Loop bool   `json:"loop"`
+	Stop bool   `json:"stop"`
 }
 
 type VolumeArgs struct {
@@ -12,13 +12,12 @@ type VolumeArgs struct {
 
 const (
 	dir = "assets/audio/"
-	ext = "wav"
 )
 
 type optPlay func(*PlayArgs)
 
 func NewPlayArgs(opts ...optPlay) *PlayArgs {
-	u := &PlayArgs{wav: "", loop: false, stop: false}
+	u := &PlayArgs{Src: "", Loop: false, Stop: false}
 	for _, opt := range opts {
 		opt(u)
 	}
@@ -27,18 +26,18 @@ func NewPlayArgs(opts ...optPlay) *PlayArgs {
 
 func Wave(name string) optPlay {
 	return func(a *PlayArgs) {
-		a.wav = dir + name
+		a.Src = dir + name
 	}
 }
 
 func Loop(enable bool) optPlay {
 	return func(a *PlayArgs) {
-		a.loop = enable
+		a.Loop = enable
 	}
 }
 
 func Stop(enable bool) optPlay {
 	return func(a *PlayArgs) {
-		a.stop = enable
+		a.Stop = enable
 	}
 }
