@@ -58,31 +58,31 @@ func (p *Proxy) work() {
 			if isDone(p.closing) {
 				goto END
 			}
-			p.sp.Play(a)
+			go p.sp.Play(a)
 		case <-p.Stop:
 			log.Debug("call chan Proxy.Stop")
 			if isDone(p.closing) {
 				goto END
 			}
-			p.sp.Stop(nil)
+			go p.sp.Stop(nil)
 		case a := <-p.Volume:
 			log.Debug("call chan Proxy.Volume")
 			if isDone(p.closing) {
 				goto END
 			}
-			p.sp.Volume(a.Vol)
+			go p.sp.Volume(a.Vol)
 		case <-p.Pause:
 			log.Debug("call chan Proxy.Pause")
 			if isDone(p.closing) {
 				goto END
 			}
-			p.sp.Pause()
+			go p.sp.Pause()
 		case <-p.Resume:
 			log.Debug("call chan Proxy.Resume")
 			if isDone(p.closing) {
 				goto END
 			}
-			p.sp.Resume()
+			go p.sp.Resume()
 		}
 	}
 END:

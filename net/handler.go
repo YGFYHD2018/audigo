@@ -113,50 +113,73 @@ func (h *handler) play(c *gin.Context) {
 }
 
 func (h *handler) stop(c *gin.Context) {
-	log.Info("call stop rest-api audio module.\n", c)
+	log.Info("call stop rest-api audio module.\n", c.Request.Header)
 	code := http.StatusAccepted
 	p, err := h.getPlayer(c.Param("content_id"), false)
 	if err != nil {
 		return
 	}
-	p.Stop <- struct{}{}
+	select {
+	case p.Stop <- struct{}{}:
+		break
+	default:
+		log.Error("dont send player chan: stop")
+	}
 	c.JSON(code, nil)
 }
 
 func (h *handler) volume(c *gin.Context) {
-	log.Info("call volume rest-api audio module.\n", c)
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	log.Info("call play rest-api audio module.\n", c.Request.Header, "\n", string(body))
+	c.Request.Body = ioutil.NopCloser(bytes.NewReader(body))
 	code := http.StatusAccepted
 	p, err := h.getPlayer(c.Param("content_id"), true)
 	if err != nil {
 		return
 	}
-	args := player.VolumeArgs{}
-	if err := c.ShouldBindJSON(args); err != nil {
+	var args player.VolumeArgs
+	if err := c.ShouldBindJSON(&args); err != nil {
+		log.Error("Json binded error: ", err.Error())
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	p.Volume <- &args
+	select {
+	case p.Volume <- &args:
+		break
+	default:
+		log.Error("dont send player chan: stop")
+	}
 	c.JSON(code, nil)
 }
 
 func (h *handler) pause(c *gin.Context) {
-	log.Info("call pause rest-api audio module.\n", c)
+	log.Info("call pause rest-api audio module.\n", c.Request.Header)
 	code := http.StatusAccepted
 	p, err := h.getPlayer(c.Param("content_id"), true)
 	if err != nil {
 		return
 	}
-	p.Pause <- struct{}{}
+	select {
+	case p.Pause <- struct{}{}:
+		break
+	default:
+		log.Error("dont send player chan: stop")
+	}
 	c.JSON(code, nil)
 }
 
 func (h *handler) resume(c *gin.Context) {
-	log.Info("call resume rest-api audio module.\n", c)
+	log.Info("call resume rest-api audio module.\n", c.Request.Header)
 	code := http.StatusAccepted
 	p, err := h.getPlayer(c.Param("content_id"), true)
 	if err != nil {
 		return
 	}
-	p.Resume <- struct{}{}
+	select {
+	case p.Resume <- struct{}{}:
+		break
+	default:
+		log.Error("dont send player chan: stop")
+	}
 	c.JSON(code, nil)
 }

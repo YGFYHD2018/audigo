@@ -78,14 +78,15 @@ func (p *player) Play(args *PlayArgs) {
 	p.setPlayer(format.SampleRate, format.SampleRate.N(time.Millisecond*CHUNK))
 	p.mixer.Play(s)
 	<-playing
-	p.done.Reset()
+	// p.done.Reset()
 }
 
 func (p *player) Stop(callback chan<- struct{}) {
 	if p.done == nil {
 		return
 	}
-	p.done.Close()
+	// p.done.Close()
+	p.done.Reset()
 	if callback != nil {
 		close(callback)
 	}

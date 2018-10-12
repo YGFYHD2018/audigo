@@ -7,7 +7,7 @@ type PlayArgs struct {
 }
 
 type VolumeArgs struct {
-	Vol float64
+	Vol float64 `json:"vol"`
 }
 
 const (
