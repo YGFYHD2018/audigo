@@ -9,34 +9,35 @@ var (
 	proxyPool  sync.Pool
 )
 
-func NewProxy() *Proxy {
-	proxy := proxyPool.Get().(*Proxy)
-	player := playerPool.Get().(*player)
+func init() {
+	initPool()
+}
+
+func NewProxy() Proxy {
+	proxy := proxyPool.Get().(*simpleProxy)
+	player := playerPool.Get().(Player)
 	proxy.setPlayer(player)
 	return proxy
 }
 
-func CloseProxy(p *Proxy) {
-	if p.sp != nil {
-		playerPool.Put(p.sp)
+func CloseProxy(p Proxy) {
+	p_ := p.(*simpleProxy)
+	if p_.sp != nil {
+		playerPool.Put(p_.sp)
 	}
 	proxyPool.Put(p)
-}
-
-func init() {
-	initPool()
 }
 
 func initPool() {
 	playerPool = sync.Pool{
 		New: func() interface{} {
-			return newPlayerImpl() // todo trans internal
+			return newSimplePlayer() // todo trans internal
 		},
 	}
 
 	proxyPool = sync.Pool{
 		New: func() interface{} {
-			return newProxyImpl() // todo trans internal
+			return newSimpleProxy() // todo trans internal
 		},
 	}
 }

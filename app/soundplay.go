@@ -38,26 +38,26 @@ func SoundPlay() {
 	stopPlayers(list)
 }
 
-func playFiles(files []string, w *sync.WaitGroup) []*player.Proxy {
-	plist := make([]*player.Proxy, len(files))
+func playFiles(files []string, w *sync.WaitGroup) []player.Proxy {
+	plist := make([]player.Proxy, len(files))
 	for i, arg := range files {
 		p := player.NewProxy()
 		plist[i] = p
 
 		w.Add(1)
-		go func(p *player.Proxy, name string) {
-			p.Play <- player.NewPlayArgs(
-				player.Src(name),
-				player.Loop(false))
+		go func(p player.Proxy, name string) {
+			p.GetChannel() <- &player.Action{
+				Act:  player.Play,
+				Args: &player.PlayArgs{Src: name, Loop: false}}
 			w.Done()
 		}(p, arg)
 	}
 	return plist
 }
 
-func stopPlayers(plist []*player.Proxy) {
+func stopPlayers(plist []player.Proxy) {
 	time.Sleep(time.Second * 2)
 	for _, p := range plist {
-		p.Stop <- struct{}{}
+		p.GetChannel() <- &player.Action{Act: player.Stop}
 	}
 }

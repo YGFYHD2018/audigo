@@ -22,7 +22,7 @@ const (
 )
 
 type handler struct {
-	players map[string]*player.Proxy
+	players map[string]player.Proxy
 }
 
 // SetHandler は、ginにapiハンドラーを設定します。
@@ -47,7 +47,7 @@ func setV1(r *gin.Engine) {
 func newHandler() *handler {
 	var inst *handler
 	inst = &handler{
-		players: make(map[string]*player.Proxy, INIT_PLAYER_COUNT), // TODO
+		players: make(map[string]player.Proxy, INIT_PLAYER_COUNT), // TODO
 	}
 	return inst
 }
@@ -60,7 +60,7 @@ func (h *handler) create(c *gin.Context) {
 	c.JSON(code, nil)
 }
 
-func (h *handler) getPlayer(id string, create bool) (*player.Proxy, error) {
+func (h *handler) getPlayer(id string, create bool) (player.Proxy, error) {
 	p, ok := h.players[id]
 	if !ok {
 		if create {
@@ -101,10 +101,9 @@ func (h *handler) play(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	player.Src(args.Src)(&args)
 	// send
 	select {
-	case p.Play <- &args:
+	case p.GetChannel() <- &player.Action{Act: player.Play, Args: &args}:
 		break
 	default:
 		log.Error("dont send player chan: play")
@@ -114,13 +113,15 @@ func (h *handler) play(c *gin.Context) {
 
 func (h *handler) stop(c *gin.Context) {
 	log.Info("call stop rest-api audio module.\n", c.Request.Header)
+
 	code := http.StatusAccepted
 	p, err := h.getPlayer(c.Param("content_id"), false)
 	if err != nil {
 		return
 	}
+	// send
 	select {
-	case p.Stop <- struct{}{}:
+	case p.GetChannel() <- &player.Action{Act: player.Stop, Args: struct{}{}}:
 		break
 	default:
 		log.Error("dont send player chan: stop")
@@ -132,6 +133,7 @@ func (h *handler) volume(c *gin.Context) {
 	body, _ := ioutil.ReadAll(c.Request.Body)
 	log.Info("call play rest-api audio module.\n", c.Request.Header, "\n", string(body))
 	c.Request.Body = ioutil.NopCloser(bytes.NewReader(body))
+
 	code := http.StatusAccepted
 	p, err := h.getPlayer(c.Param("content_id"), true)
 	if err != nil {
@@ -143,8 +145,9 @@ func (h *handler) volume(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
+	// send
 	select {
-	case p.Volume <- &args:
+	case p.GetChannel() <- &player.Action{Act: player.Volume, Args: &args}:
 		break
 	default:
 		log.Error("dont send player chan: stop")
@@ -160,7 +163,7 @@ func (h *handler) pause(c *gin.Context) {
 		return
 	}
 	select {
-	case p.Pause <- struct{}{}:
+	case p.GetChannel() <- &player.Action{Act: player.Pause, Args: struct{}{}}:
 		break
 	default:
 		log.Error("dont send player chan: stop")
@@ -176,7 +179,7 @@ func (h *handler) resume(c *gin.Context) {
 		return
 	}
 	select {
-	case p.Resume <- struct{}{}:
+	case p.GetChannel() <- &player.Action{Act: player.Resume, Args: struct{}{}}:
 		break
 	default:
 		log.Error("dont send player chan: stop")

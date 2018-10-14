@@ -3,44 +3,57 @@ package player
 import "github.com/code560/audigo/util"
 
 const (
-	ChanSize = 10
+	ChanSize = 20
 )
 
 // Proxy は、sound player proxyです。
-type Proxy struct {
-	Play   chan *PlayArgs
-	Stop   chan struct{}
-	Volume chan *VolumeArgs
-	Pause  chan struct{}
-	Resume chan struct{}
+type Proxy interface {
+	GetChannel() chan<- *Action
+}
 
+type Action struct {
+	Act  Actions
+	Args interface{}
+}
+
+type Actions int
+
+const (
+	_ Actions = iota
+	Play
+	Stop
+	Volume
+	Pause
+	Resume
+)
+
+type simpleProxy struct {
+	sp      Player
+	act     chan *Action
 	closing chan struct{}
-
-	sp *player
 }
 
 // NewProxy は、Playerを生成して返します。
-func newProxyImpl() *Proxy {
-	return &Proxy{
-		Play:   make(chan *PlayArgs, ChanSize),
-		Stop:   make(chan struct{}, ChanSize),
-		Volume: make(chan *VolumeArgs, ChanSize),
-		Pause:  make(chan struct{}, ChanSize),
-		Resume: make(chan struct{}, ChanSize),
-
+func newSimpleProxy() Proxy {
+	return &simpleProxy{
+		act:     make(chan *Action, ChanSize),
 		closing: make(chan struct{}),
 	}
 }
 
-func (p *Proxy) setPlayer(player *player) {
-	if p.sp != nil && util.IsDone(p.sp.done.GetDone()) {
+func (p *simpleProxy) GetChannel() chan<- *Action {
+	return p.act
+}
+
+func (p *simpleProxy) setPlayer(player Player) {
+	if p.sp != nil {
 		p.sp.Stop(nil)
 	}
 	p.sp = player
 	p.rechan()
 }
 
-func (p *Proxy) rechan() {
+func (p *simpleProxy) rechan() {
 	// stop and restart worker
 	close(p.closing)
 	p.closing = make(chan struct{})
@@ -50,42 +63,41 @@ func (p *Proxy) rechan() {
 	go p.work()
 }
 
-func (p *Proxy) work() {
+func (p *simpleProxy) work() {
 	for {
 		select {
-		case a := <-p.Play:
-			log.Debug("call chan Proxy.Play")
+		case v := <-p.act:
 			if isDone(p.closing) {
-				goto END
+				return
 			}
-			go p.sp.Play(a)
-		case <-p.Stop:
-			log.Debug("call chan Proxy.Stop")
-			if isDone(p.closing) {
-				goto END
-			}
-			go p.sp.Stop(nil)
-		case a := <-p.Volume:
-			log.Debug("call chan Proxy.Volume")
-			if isDone(p.closing) {
-				goto END
-			}
-			go p.sp.Volume(a.Vol)
-		case <-p.Pause:
-			log.Debug("call chan Proxy.Pause")
-			if isDone(p.closing) {
-				goto END
-			}
-			go p.sp.Pause()
-		case <-p.Resume:
-			log.Debug("call chan Proxy.Resume")
-			if isDone(p.closing) {
-				goto END
-			}
-			go p.sp.Resume()
+			p.call(v)
 		}
 	}
-END:
+}
+
+func (p *simpleProxy) call(arg *Action) {
+	switch arg.Act {
+	case Play:
+		log.Debug("call chan Proxy.Play")
+		a := arg.Args.(*PlayArgs)
+		a.Src = dir + a.Src
+		go p.sp.Play(a)
+	case Stop:
+		log.Debug("call chan Proxy.Stop")
+		go p.sp.Stop(nil)
+	case Pause:
+		log.Debug("call chan Proxy.Pause")
+		go p.sp.Pause()
+	case Resume:
+		log.Debug("call chan Proxy.Resume")
+		go p.sp.Resume()
+	case Volume:
+		log.Debug("call chan Proxy.Volume")
+		a := arg.Args.(*VolumeArgs)
+		go p.sp.Volume(a)
+	default:
+		log.Warn("nothing call player function")
+	}
 }
 
 func isDone(c chan struct{}) bool {
