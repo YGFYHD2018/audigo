@@ -37,6 +37,8 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 	p.mixer = p.makeMixer()
 	p.mixer.Play(s)
 	<-playing
+
+	p.reset()
 }
 
 func (p *simplePlayer) Volume(args *VolumeArgs) {
@@ -58,4 +60,15 @@ func (p *simplePlayer) Resume() {
 		p.ctrl = p.makeCtrl()
 	}
 	p.ctrl.Paused = false
+}
+
+func (p *simplePlayer) reset() {
+	p.close = p.makeClosing()
+
+	p.ctrl = nil
+	p.vol = nil
+	p.mixer = nil
+	p.oto = nil
+	p.samples = nil
+	p.buf = nil
 }

@@ -45,13 +45,15 @@ func NewClosing() *Closing {
 
 func (c *Closing) Reset() {
 	c.Close()
+
+	muClosing.Lock()
+	defer muClosing.Unlock()
 	c.done = make(chan struct{})
 }
 
 func (c *Closing) Close() {
 	muClosing.Lock()
 	defer muClosing.Unlock()
-
 	if !IsDone(c.done) {
 		close(c.done)
 	}
