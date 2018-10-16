@@ -16,16 +16,10 @@ func init() {
 func NewProxy() Proxy {
 	proxy := proxyPool.Get().(*simpleProxy)
 	proxy.playerPool = &playerPool
-	// player := playerPool.Get().(Player)
-	// proxy.setPlayer(player)
 	return proxy
 }
 
 func CloseProxy(p Proxy) {
-	// p_ := p.(*simpleProxy)
-	// if p_.sp != nil {
-	// 	playerPool.Put(p_.sp)
-	// }
 	proxyPool.Put(p)
 }
 

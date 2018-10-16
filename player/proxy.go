@@ -35,14 +35,21 @@ type simpleProxy struct {
 	playerPool *sync.Pool
 	act        chan *Action
 	closing    chan struct{}
+
+	plays   map[int]Player
+	playMtx sync.Mutex
 }
 
 // NewProxy は、Playerを生成して返します。
 func newSimpleProxy() Proxy {
-	return &simpleProxy{
+	p := &simpleProxy{
 		act:     make(chan *Action, ChanSize),
 		closing: make(chan struct{}),
+
+		plays: make(map[int]Player, 32),
 	}
+	go p.work()
+	return p
 }
 
 func (p *simpleProxy) GetChannel() chan<- *Action {
@@ -89,27 +96,77 @@ func (p *simpleProxy) call(arg *Action) {
 		log.Debug("call chan Proxy.Play")
 		a := arg.Args.(*PlayArgs)
 		a.Src = dir + a.Src
-		// go p.sp.Play(a)
-		go func(pool *sync.Pool, a *PlayArgs) {
-			p := pool.Get().(Player)
-			p.Play(a)
-			pool.Put(p)
-		}(p.playerPool, a)
+		go func(p *simpleProxy, a *PlayArgs) {
+			player := p.playerPool.Get().(Player)
+			var i int
+			p.playLock(func() {
+				i = p.pushPlayer(player)
+			})
+			player.Play(a)
+			p.playLock(func() {
+				p.popPlayer(i)
+			})
+			p.playerPool.Put(player)
+		}(p, a)
 	case Stop:
 		log.Debug("call chan Proxy.Stop")
-		// go p.sp.Stop(nil)
+		p.playLock(func() {
+			for _, player := range p.plays {
+				go player.Stop(nil)
+			}
+		})
 	case Pause:
 		log.Debug("call chan Proxy.Pause")
-		// go p.sp.Pause()
+		p.playLock(func() {
+			for _, player := range p.plays {
+				go player.Pause()
+			}
+		})
 	case Resume:
 		log.Debug("call chan Proxy.Resume")
-		// go p.sp.Resume()
+		p.playLock(func() {
+			for _, player := range p.plays {
+				go player.Resume()
+			}
+		})
 	case Volume:
 		log.Debug("call chan Proxy.Volume")
 		a := arg.Args.(*VolumeArgs)
-		// go p.sp.Volume(a)
+		p.playLock(func() {
+			for _, player := range p.plays {
+				go player.Volume(a)
+			}
+		})
 	default:
 		log.Warn("nothing call player function")
+	}
+}
+
+func (p *simpleProxy) playLock(f func()) {
+	p.playMtx.Lock()
+	f()
+	p.playMtx.Unlock()
+}
+
+func (p *simpleProxy) atPlayer(i int) Player {
+	v, ok := p.plays[i]
+	if ok {
+		return v
+	} else {
+		return nil
+	}
+}
+
+func (p *simpleProxy) pushPlayer(player Player) int {
+	i := len(p.plays)
+	p.plays[i] = player
+	return i
+}
+
+func (p *simpleProxy) popPlayer(i int) {
+	_, ok := p.plays[i]
+	if ok {
+		delete(p.plays, i)
 	}
 }
 

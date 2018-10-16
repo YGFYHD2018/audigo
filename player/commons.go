@@ -1,7 +1,6 @@
 package player
 
 import (
-	"math"
 	"os"
 	"sync"
 
@@ -17,8 +16,8 @@ import (
 // statics
 
 var (
-	mtx sync.Mutex
-	log = util.GetLogger()
+	mtxOto sync.Mutex
+	log    = util.GetLogger()
 )
 
 // consts
@@ -37,7 +36,7 @@ const (
 
 func loopCount(enable bool) int {
 	if enable {
-		return math.MaxInt64
+		return -1
 	} else {
 		return 1
 	}
@@ -110,9 +109,9 @@ func (p *playerMaker) makeClosing() *util.Closing {
 func (p *playerMaker) makeOtoPlayer(sampleRate beep.SampleRate, bufferSize int) error {
 	var err error
 	bufferNum := bufferSize * CH * BPS
-	mtx.Lock()
+	mtxOto.Lock()
 	p.oto, err = oto.NewPlayer(int(sampleRate), CH, BPS, bufferNum)
-	mtx.Unlock()
+	mtxOto.Unlock()
 	if err != nil {
 		return errors.Wrap(err, log.Error("failed to initialize oto.Player"))
 	}
@@ -134,9 +133,7 @@ func (p *playerMaker) makeOtoPlayer(sampleRate beep.SampleRate, bufferSize int) 
 }
 
 func (p *playerMaker) sampling() {
-	mtx.Lock()
 	p.mixer.Stream(p.samples)
-	mtx.Unlock()
 
 	for s := range p.samples {
 		for rl := range p.samples[s] {

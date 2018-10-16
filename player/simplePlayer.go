@@ -17,13 +17,15 @@ func newSimplePlayer() Player {
 }
 
 func (p *simplePlayer) Play(args *PlayArgs) {
+	// init
+	p.reset()
+	// and stop
 	if args.Stop {
 		p.Pause()
 	}
-
+	// open file
 	closer, format := p.openFile(args.Src)
 	defer closer.Close()
-
 	// set middleware
 	s := beep.Loop(loopCount(args.Loop), closer)
 	s = p.setCtrlStream(s)
@@ -37,8 +39,6 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 	p.mixer = p.makeMixer()
 	p.mixer.Play(s)
 	<-playing
-
-	p.reset()
 }
 
 func (p *simplePlayer) Volume(args *VolumeArgs) {
