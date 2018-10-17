@@ -13,7 +13,16 @@
 ## 💊 Requirements
 
 * git
+* dep
+    ```sh
+    $ go get -u github.com/golang/dep/cmd/dep
+    ```
 * Go 1.11 or later
+
+**Linux**
+```sh
+$ sudo apt install libasound2-dev
+```
 
 ## 📌 Installing
 
