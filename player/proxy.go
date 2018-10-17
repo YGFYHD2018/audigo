@@ -10,27 +10,6 @@ const (
 	ChanSize = 20
 )
 
-// Proxy は、sound player proxyです。
-type Proxy interface {
-	GetChannel() chan<- *Action
-}
-
-type Action struct {
-	Act  Actions
-	Args interface{}
-}
-
-type Actions int
-
-const (
-	_ Actions = iota
-	Play
-	Stop
-	Volume
-	Pause
-	Resume
-)
-
 type simpleProxy struct {
 	playerPool *sync.Pool
 	act        chan *Action

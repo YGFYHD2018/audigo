@@ -1,23 +1,34 @@
-package player_test
+package player
 
 import (
 	"testing"
-
-	"github.com/code560/audigo/player"
 )
 
 func TestCreate(t *testing.T) {
-	p := player.NewProxy()
+	p := newSimpleProxy()
 	if p == nil {
 		t.Error("dont created proxy: player.NewProxy()")
 	}
 }
 
 func TestChan(t *testing.T) {
-	p := player.NewProxy()
-	p.Play <- player.NewPlayArgs(player.Src("bgm_wave.wav"))
-	p.Volume <- &player.VolumeArgs{Vol: 1}
-	p.Pause <- struct{}{}
-	p.Resume <- struct{}{}
-	p.Stop <- struct{}{}
+	p := newSimpleProxy()
+	c := p.GetChannel()
+	act := &Action{}
+	act.Act = Play
+	act.Args = &PlayArgs{Src: "bgm_wave.wav"}
+	c <- act
+
+	act.Act = Volume
+	act.Args = &VolumeArgs{1}
+	c <- act
+
+	act.Act = Pause
+	c <- act
+
+	act.Act = Resume
+	c <- act
+
+	act.Act = Stop
+	c <- act
 }

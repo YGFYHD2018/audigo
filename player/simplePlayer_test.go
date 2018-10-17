@@ -8,26 +8,28 @@ import (
 	"github.com/code560/audigo/util"
 )
 
-var l = util.GetLogger()
+var (
+	l = util.GetLogger()
+)
 
-func TestSound(t *testing.T) {
+func TestPlayer(t *testing.T) {
+	dir := "../asset/audio/"
 	args := []string{
 		"bgm_wave.wav",
 		"se_jump.wav",
+		"info-girl1-bubu1.mp3",
 	}
 
 	wg := &sync.WaitGroup{}
-	plist := make([]*player, len(args))
+	plist := make([]Player, len(args))
 	for i, arg := range args {
-		p := newPlayerImpl()
+		p := newSimplePlayer()
 		plist[i] = p
 		wg.Add(1)
-		go func(p *player, name string) {
-			p.Play(NewPlayArgs(
-				Src(name),
-				Loop(true)))
+		go func(p Player, name string) {
+			p.Play(&PlayArgs{name, false, false})
 			wg.Done()
-		}(p, arg)
+		}(p, dir+arg)
 	}
 
 	wg.Wait()
@@ -45,7 +47,7 @@ func TestSound(t *testing.T) {
 
 func TestUnexpectedSound(t *testing.T) {
 	loop := 10
-	p := newPlayerImpl()
+	p := newSimplePlayer()
 	for i := 0; i < loop; i++ {
 		p.Stop(nil)
 	}
@@ -55,7 +57,7 @@ func TestUnexpectedSound(t *testing.T) {
 	for i := 0; i < loop; i++ {
 		p.Resume()
 	}
-	arg := 1.8
+	arg := &VolumeArgs{1.8}
 	for i := 0; i < loop; i++ {
 		p.Volume(arg)
 	}

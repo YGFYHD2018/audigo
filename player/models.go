@@ -21,3 +21,23 @@ type VolumeArgs struct {
 const (
 	dir = "asset/audio/"
 )
+
+type Proxy interface {
+	GetChannel() chan<- *Action
+}
+
+type Action struct {
+	Act  Actions
+	Args interface{}
+}
+
+type Actions int
+
+const (
+	_ Actions = iota
+	Play
+	Stop
+	Volume
+	Pause
+	Resume
+)
