@@ -5,7 +5,7 @@
 * [💊  Requirements](#-requirements)
 * [📌 Installing](#-installing)
 * [🎧  Usage](#-usage)
-* [☎️  Api](#-api)
+* [🌏️  Api](#-api)
 * [🎃  Notes](#-notes)
 <!-- tocstop -->  
 
