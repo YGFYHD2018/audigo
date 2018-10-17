@@ -47,7 +47,7 @@ $ go run audigo.go 80
 add port number. default port 8080
 
 
-# ☎️  Api
+# 🌏 Api
 | REST | URI                             | note                          | arguments     |
 |------|---------------------------------|-------------------------------|---------------|
 | GET  | /audio/v1/ping                  | I Can Fly !                   | none          |
