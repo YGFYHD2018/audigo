@@ -191,7 +191,7 @@ func (p *playerMaker) openFile(src string) (beep.StreamSeekCloser, *beep.Format)
 	case ".mp3":
 		closer, format, err = mp3.Decode(f)
 	default:
-		log.Errorf("dont support file: %s\n", src)
+		log.Errorf("dont support file: %s", src)
 		return nil, nil
 	}
 	if err != nil {

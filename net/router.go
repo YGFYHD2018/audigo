@@ -2,6 +2,7 @@ package net
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,15 @@ func NewRouter() Router {
 }
 
 func (r *router) Run(port string) {
+	if len(port) == 0 {
+		port = "8080"
+	}
 	log.Info("start listen: ", port)
+
+	_, err := strconv.Atoi(port)
+	if err != nil {
+		log.Errorf("dont number of port: %s", port)
+		return
+	}
 	r.router.Run(fmt.Sprintf(":%s", port))
 }
