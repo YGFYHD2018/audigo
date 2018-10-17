@@ -12,6 +12,7 @@
 # Getting Started
 ## 💊 Requirements
 
+**ALL**  
 * git
 * dep
     ```sh
@@ -19,11 +20,12 @@
     ```
 * Go 1.11 or later
 
-**Linux**
+**Linux**  
 ```sh
 $ sudo apt install libasound2-dev
 ```
-
+  
+  
 ## 📌 Installing
 
 1. Goto GOPATH  
@@ -50,7 +52,7 @@ $ sudo apt install libasound2-dev
     ```
 
 # 🎧 Usage
-Start audio service.
+Start audio service.  
 ```sh
 $ go run audigo.go 80
 ```
@@ -79,7 +81,7 @@ add port number. default port 8080
 | Platform / Architecture        | x86 | x86_64 |
 |--------------------------------|-----|--------|
 | Windows (7, 10 or Later)       |     | ✓     |
-| Rasbian (?)                    |     |        |
+| Rasbian (?)                    | ✓  | -      |
 | OSX (?)                        |     |        |
 
 
