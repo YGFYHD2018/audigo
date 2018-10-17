@@ -2,10 +2,13 @@ package player
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
+	"github.com/faiface/beep/mp3"
 	"github.com/faiface/beep/wav"
 	"github.com/hajimehoshi/oto"
 	"github.com/pkg/errors"
@@ -179,7 +182,18 @@ func (p *playerMaker) openFile(src string) (beep.StreamSeekCloser, *beep.Format)
 		return nil, nil
 	}
 	// decode file
-	closer, format, err := wav.Decode(f)
+	ext := strings.ToLower(filepath.Ext(src))
+	var closer beep.StreamSeekCloser
+	var format beep.Format
+	switch ext {
+	case ".wav":
+		closer, format, err = wav.Decode(f)
+	case ".mp3":
+		closer, format, err = mp3.Decode(f)
+	default:
+		log.Errorf("dont support file: %s\n", src)
+		return nil, nil
+	}
 	if err != nil {
 		log.Error("dont decode file: %s\n%s", src, err.Error())
 		return nil, nil

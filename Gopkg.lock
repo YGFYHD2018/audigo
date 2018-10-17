@@ -3,11 +3,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:19868636cb7f18c9cafc80c9590df629cabae33c99f31cc50637bc174b058320"
+  digest = "1:4eb663d098f02c510f4f550cbcbbdef6ddb3ccbef7876bd6e12b5f934ae91fc8"
   name = "github.com/faiface/beep"
   packages = [
     ".",
     "effects",
+    "mp3",
     "wav",
   ]
   pruneopts = "UT"
@@ -57,6 +58,24 @@
   pruneopts = "UT"
   revision = "491e2f5cf3e461ccc9f47e79ac430009f7e09e4d"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:52430c9cb1b419d4d7cc21b6536732a492376820e4d6aa43bc2dd0b53ae491a5"
+  name = "github.com/hajimehoshi/go-mp3"
+  packages = [
+    ".",
+    "internal/bits",
+    "internal/consts",
+    "internal/frame",
+    "internal/frameheader",
+    "internal/huffman",
+    "internal/imdct",
+    "internal/maindata",
+    "internal/sideinfo",
+  ]
+  pruneopts = "UT"
+  revision = "90191ee719ddc192865cd96bdc8013ef1ed6dbea"
+  version = "v0.1.1"
 
 [[projects]]
   digest = "1:bb54edc552c39aa1dc5bd3d0b3b9918b23dc5e15420198ab539b78302f6e64d2"
@@ -223,6 +242,7 @@
   input-imports = [
     "github.com/faiface/beep",
     "github.com/faiface/beep/effects",
+    "github.com/faiface/beep/mp3",
     "github.com/faiface/beep/wav",
     "github.com/gin-gonic/gin",
     "github.com/hajimehoshi/oto",
