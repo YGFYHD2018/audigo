@@ -44,6 +44,11 @@ $ sudo apt install libasound2-dev
     $ dep ensure
     ```
 
+3. Build
+    ```sh
+    $ go build ./audigo.go
+    ```
+
 # 🎧 Usage
 Start audio service.
 ```sh
