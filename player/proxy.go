@@ -56,28 +56,6 @@ func (p *simpleProxy) GetChannel() chan<- *Action {
 	return p.act
 }
 
-// func (p *simpleProxy) getPlayer() Player {
-// 	return p.playerPool.Get().(Player)
-// }
-
-// func (p *simpleProxy) setPlayer(player Player) {
-// 	if p.sp != nil {
-// 		p.sp.Stop(nil)
-// 	}
-// 	p.sp = player
-// 	p.rechan()
-// }
-
-// func (p *simpleProxy) rechan() {
-// 	// stop and restart worker
-// 	close(p.closing)
-// 	p.closing = make(chan struct{})
-// 	if p.sp == nil {
-// 		return
-// 	}
-// 	go p.work()
-// }
-
 func (p *simpleProxy) work() {
 	for {
 		select {
