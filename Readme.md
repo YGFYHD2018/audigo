@@ -46,6 +46,22 @@ $ go run audigo.go 80
 ### port
 add port number. default port 8080
 
+## Directory layout
+
+Add sound file in audigo/asset/audio
+
+```sh
+audigo
+ |-- audigo.go
+ |-- asset
+      |-- audio
+           |-- bgm_wave.wav
+           |-- hogehoge.mp3
+           |-- foobar.wav
+...
+
+```
+
 
 # 🌏️ Api
 | REST | URI                             | note                          | arguments     |
