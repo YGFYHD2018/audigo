@@ -67,7 +67,7 @@ add port number. default port 8080
     ```
 
 ### repl mode
-add repl mode and current directory
+start repl mode and current directory
 
     ```sh
     for Windows
@@ -120,7 +120,7 @@ audigo
 |------|---------------------------------|-------------------------------|----------------------|
 | GET  | /audio/v1/ping                  | I Can Fly !                   | none                 |
 | POST | /audio/v1/init/\<content id>    | init players in memory        | none                 |
-| POST | /audio/v1/play/\<content id>    | play sound                    | src: "bgm_wave.wav" (file name in ./asset/audio/) <br>loop: true or false (loop play or single play) <br>stop: true or false (start and pause or normal play)        |
+| POST | /audio/v1/play/\<content id>    | play sound                    | src: "bgm_wave.wav"<br> (file name in ./asset/audio/) <br><br>loop: true or false<br> (loop play or single play) <br><br>stop: true or false<br> (start and pause or normal play)        |
 | POST | /audio/v1/stop/\<content id>    | stop content player sound     | none                 |
 | POST | /audio/v1/pause/\<content id>   | pause content player sound    | none                 |
 | POST | /audio/v1/resume/\<content id>  | resume content player sound   | none                 |
