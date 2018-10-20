@@ -18,7 +18,7 @@ var (
 )
 
 const (
-	INIT_PLAYER_COUNT = 10
+	INIT_PLAYER_COUNT = 25
 )
 
 type handler struct {
@@ -47,7 +47,7 @@ func setV1(r *gin.Engine) {
 func newHandler() *handler {
 	var inst *handler
 	inst = &handler{
-		players: make(map[string]player.Proxy, INIT_PLAYER_COUNT), // TODO
+		players: make(map[string]player.Proxy, INIT_PLAYER_COUNT),
 	}
 	return inst
 }
