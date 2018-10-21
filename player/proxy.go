@@ -50,7 +50,6 @@ func (p *simpleProxy) work() {
 func (p *simpleProxy) call(arg *Action) {
 	switch arg.Act {
 	case Play:
-		log.Debug("call chan Proxy.Play")
 		a := arg.Args.(*PlayArgs)
 		a.Src = dir + a.Src
 		go func(p *simpleProxy, a *PlayArgs) {
@@ -66,28 +65,24 @@ func (p *simpleProxy) call(arg *Action) {
 			p.playerPool.Put(player)
 		}(p, a)
 	case Stop:
-		log.Debug("call chan Proxy.Stop")
 		p.playLock(func() {
 			for _, player := range p.plays {
 				go player.Stop(nil)
 			}
 		})
 	case Pause:
-		log.Debug("call chan Proxy.Pause")
 		p.playLock(func() {
 			for _, player := range p.plays {
 				go player.Pause()
 			}
 		})
 	case Resume:
-		log.Debug("call chan Proxy.Resume")
 		p.playLock(func() {
 			for _, player := range p.plays {
 				go player.Resume()
 			}
 		})
 	case Volume:
-		log.Debug("call chan Proxy.Volume")
 		a := arg.Args.(*VolumeArgs)
 		p.playLock(func() {
 			for _, player := range p.plays {

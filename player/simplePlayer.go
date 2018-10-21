@@ -39,7 +39,6 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 	s = beep.Seq(s, beep.Callback(func() {
 		p.Stop(nil)
 		close(playing)
-		log.Debug("*** call finish play")
 	}))
 	// play sound
 	p.makeOtoPlayer(format.SampleRate, format.SampleRate.N(time.Millisecond*CHUNK))

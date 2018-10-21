@@ -56,7 +56,7 @@ $ sudo apt install libasound2-dev
 # 🎧 Usage
 Start audio service.  
 ```sh
-$ audigo
+$ ./audigo
 ```
 
 ## 🔨 Options

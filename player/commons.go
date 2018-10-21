@@ -128,7 +128,6 @@ func (p *playerMaker) makeOtoPlayer(sampleRate beep.SampleRate, bufferSize int) 
 				log.Info("closing player")
 				return
 			default:
-				log.Debug("*** call sampling")
 				p.sampling()
 			}
 		}
