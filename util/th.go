@@ -5,10 +5,10 @@ import (
 	"sync"
 )
 
-func recoveGo(f func() error) error {
+func RecoveGo(f func() error) error {
 	e := make(chan error, 1)
 	go func() {
-		if err := recove(f); err != nil {
+		if err := Recove(f); err != nil {
 			e <- err
 		}
 		e <- nil
@@ -16,7 +16,7 @@ func recoveGo(f func() error) error {
 	return <-e
 }
 
-func recove(f func() error) error {
+func Recove(f func() error) error {
 	log := GetLogger()
 	defer func() error {
 		if r := recover(); r != nil {

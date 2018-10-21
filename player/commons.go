@@ -127,7 +127,14 @@ func (p *playerMaker) makeOtoPlayer(sampleRate beep.SampleRate, bufferSize int) 
 				log.Info("closing player")
 				return
 			default:
-				p.sampling()
+				// p.sampling()
+				if err := util.Recove(func() error {
+					p.sampling()
+					return nil
+				}); err != nil {
+					log.Warn("error sampling and close play")
+					return
+				}
 			}
 		}
 	}(p.close.GetDone())
