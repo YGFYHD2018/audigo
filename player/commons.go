@@ -32,7 +32,6 @@ const (
 
 	VOLUME_BASE = 1.2
 	VOLUME_INIT = 1
-	// TODO マジックナンバー撲滅活動
 )
 
 // functions
@@ -48,7 +47,8 @@ func loopCount(enable bool) int {
 // create
 
 type playerMaker struct {
-	close *util.Closing
+	close      *util.Closing
+	streaMutex sync.Mutex
 
 	ctrl    *beep.Ctrl
 	vol     *effects.Volume
@@ -128,6 +128,7 @@ func (p *playerMaker) makeOtoPlayer(sampleRate beep.SampleRate, bufferSize int) 
 				log.Info("closing player")
 				return
 			default:
+				log.Debug("*** call sampling")
 				p.sampling()
 			}
 		}
@@ -136,7 +137,13 @@ func (p *playerMaker) makeOtoPlayer(sampleRate beep.SampleRate, bufferSize int) 
 }
 
 func (p *playerMaker) sampling() {
+	p.streaMutex.Lock()
+	if p.samples == nil {
+		p.streaMutex.Unlock()
+		return
+	}
 	p.mixer.Stream(p.samples)
+	p.streaMutex.Unlock()
 
 	for s := range p.samples {
 		for rl := range p.samples[s] {
