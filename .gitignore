@@ -6,3 +6,5 @@ trace.out
 debug
 debug.test
 *.log
+
+audigo.exe
