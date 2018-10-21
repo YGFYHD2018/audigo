@@ -2,16 +2,98 @@ package main
 
 import (
 	"os"
-	"path"
 
 	"github.com/code560/audigo/app"
+	"github.com/code560/audigo/util"
+	"github.com/urfave/cli"
 )
 
-var execDir = path.Dir(os.Args[0])
+var log = util.GetLogger()
 
 func main() {
-	os.Chdir(execDir)
+	// reset cd
+	execDir, _ := os.Executable()
+	log.Debugf("executable: %s", execDir)
 
-	app.Serve()
-	// app.SoundPlay()
+	cl := cli.NewApp()
+	cl.Name = "audigo"
+	cl.Usage = "Audio service by LED CUBU"
+	cl.Version = "1.0.0"
+
+	cl.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "cd",
+			Usage: "change current directory by repl",
+			Value: "",
+		},
+	}
+	clientFlags := append(cl.Flags,
+		cli.StringFlag{
+			Name:  "domain, d",
+			Usage: "set request domain url by client",
+			Value: "http://audigo.local",
+		})
+	cl.Commands = []cli.Command{
+		{
+			Name:    "server",
+			Aliases: []string{"s"},
+			Usage:   "Instant server mode. (default)",
+			Action:  doServe,
+			Flags:   cl.Flags,
+		},
+		{
+			Name:    "client",
+			Aliases: []string{"c"},
+			Usage:   "Instant client REPL mode.",
+			Action:  doClientRepl,
+			Flags:   clientFlags,
+		},
+		{
+			Name:    "repl",
+			Aliases: []string{"r"},
+			Usage:   "Instant local REPL mode.",
+			Action:  doRepl,
+			Flags:   cl.Flags,
+		},
+	}
+	cl.Action = doServe
+
+	cl.Run(os.Args)
+}
+
+func doServe(ctx *cli.Context) error {
+	asCd(ctx)
+	app.Serve(ctx.Args().Get(0))
+	return nil
+}
+
+func doClientRepl(ctx *cli.Context) error {
+	asCd(ctx)
+	url := ctx.String("d")
+	app.ClientRepl(url, "abc")
+	return nil
+}
+
+func doRepl(ctx *cli.Context) error {
+	asCd(ctx)
+	app.Repl()
+	return nil
+}
+
+func asCd(ctx *cli.Context) {
+	if ctx.IsSet("cd") {
+		dir := ctx.String("cd")
+		cd(dir)
+	}
+}
+
+func cd(dir string) {
+	if dir != "" {
+		stat, _ := os.Stat(dir)
+		if stat.IsDir() {
+			// if os.IsExist(err) {
+			os.Chdir(dir)
+			log.Debugf("change current directory: %s", dir)
+		}
+	}
 }

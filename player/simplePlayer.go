@@ -1,6 +1,7 @@
 package player
 
 import (
+	"os"
 	"time"
 
 	"github.com/faiface/beep"
@@ -24,6 +25,10 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 		p.Pause()
 	}
 	// open file
+	if _, err := os.Stat(args.Src); err != nil {
+		log.Warn("not found music file: %s", args.Src)
+		return
+	}
 	closer, format := p.openFile(args.Src)
 	defer closer.Close()
 	// set middleware
@@ -32,7 +37,9 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 	s = p.setVolumeStream(s)
 	playing := make(chan struct{})
 	s = beep.Seq(s, beep.Callback(func() {
+		p.Stop(nil)
 		close(playing)
+		log.Debug("*** call finish play")
 	}))
 	// play sound
 	p.makeOtoPlayer(format.SampleRate, format.SampleRate.N(time.Millisecond*CHUNK))
@@ -65,10 +72,12 @@ func (p *simplePlayer) Resume() {
 func (p *simplePlayer) reset() {
 	p.close = p.makeClosing()
 
+	p.streaMutex.Lock()
 	p.ctrl = nil
 	p.vol = nil
 	p.mixer = nil
 	p.oto = nil
 	p.samples = nil
 	p.buf = nil
+	p.streaMutex.Unlock()
 }

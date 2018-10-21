@@ -27,7 +27,7 @@ func NewRouter() Router {
 
 func (r *router) Run(port string) {
 	if len(port) == 0 {
-		port = "8080"
+		port = "80"
 	}
 	log.Info("start listen: ", port)
 
