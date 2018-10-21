@@ -11,7 +11,6 @@ import (
 	"github.com/faiface/beep/mp3"
 	"github.com/faiface/beep/wav"
 	"github.com/hajimehoshi/oto"
-	"github.com/pkg/errors"
 
 	"github.com/code560/audigo/util"
 )
@@ -116,7 +115,7 @@ func (p *playerMaker) makeOtoPlayer(sampleRate beep.SampleRate, bufferSize int) 
 	p.oto, err = oto.NewPlayer(int(sampleRate), CH, BPS, bufferNum)
 	mtxOto.Unlock()
 	if err != nil {
-		return errors.Wrap(err, log.Error("failed to initialize oto.Player"))
+		return err
 	}
 	p.samples = make([][CH]float64, bufferSize)
 	p.buf = make([]byte, bufferNum)

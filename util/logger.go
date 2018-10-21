@@ -21,6 +21,7 @@ type Log interface {
 
 	Debugf(f string, v ...interface{}) string
 	Infof(f string, v ...interface{}) string
+	Warnf(f string, v ...interface{}) string
 	Errorf(f string, v ...interface{}) string
 }
 
@@ -105,6 +106,10 @@ func (l *logger) Debugf(f string, v ...interface{}) string {
 
 func (l *logger) Infof(f string, v ...interface{}) string {
 	return l.Info(fmt.Sprintf(f, v...))
+}
+
+func (l *logger) Warnf(f string, v ...interface{}) string {
+	return l.Warn(fmt.Sprintf(f, v...))
 }
 
 func (l *logger) Errorf(f string, v ...interface{}) string {

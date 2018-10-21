@@ -26,7 +26,7 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 	}
 	// open file
 	if _, err := os.Stat(args.Src); err != nil {
-		log.Warn("not found music file: %s", args.Src)
+		log.Warnf("not found music file: %s", args.Src)
 		return
 	}
 	closer, format := p.openFile(args.Src)
@@ -42,7 +42,7 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 	}))
 	// play sound
 	if err := p.makeOtoPlayer(format.SampleRate, format.SampleRate.N(time.Millisecond*CHUNK)); err != nil {
-		log.Warn("dont create oto player: %s", err.Error())
+		log.Warnf("dont create oto player: %s", err.Error())
 		return
 	}
 	p.mixer = p.makeMixer()
