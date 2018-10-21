@@ -135,13 +135,13 @@ func (p *playerMaker) makeOtoPlayer(sampleRate beep.SampleRate, bufferSize int) 
 }
 
 func (p *playerMaker) sampling() {
-	p.streaMutex.Lock()
+	// p.streaMutex.Lock()
 	if p.samples == nil {
-		p.streaMutex.Unlock()
+		// p.streaMutex.Unlock()
 		return
 	}
 	p.mixer.Stream(p.samples)
-	p.streaMutex.Unlock()
+	// p.streaMutex.Unlock()
 
 	for s := range p.samples {
 		for rl := range p.samples[s] {
