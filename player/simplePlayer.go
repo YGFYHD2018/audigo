@@ -38,6 +38,7 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 	playing := make(chan struct{})
 	s = beep.Seq(s, beep.Callback(func() {
 		p.Stop(nil)
+		p.oto.Close()
 		close(playing)
 	}))
 	// play sound
@@ -48,7 +49,6 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 	p.mixer = p.makeMixer()
 	p.mixer.Play(s)
 	<-playing
-	p.oto.Close()
 }
 
 func (p *simplePlayer) Volume(args *VolumeArgs) {
