@@ -43,8 +43,8 @@ $ sudo apt install libasound2-dev
 
 2. Get src
     ```sh
-    $ git clone https://github.com/YGFYHD2018/audigo.git ./src/github.com/code560/audigo
-    $ cd ./src/github.com/code560/audigo
+    $ git clone https://github.com/YGFYHD2018/audigo.git ./src/github.com/YGFYHD2018/audigo
+    $ cd ./src/github.com/YGFYHD2018/audigo
     $ dep ensure
     ```
 
