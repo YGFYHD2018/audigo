@@ -50,7 +50,12 @@ $ sudo apt install libasound2-dev
 
 3. Build
     ```sh
-    $ go build
+    $ go build -a
+    ```
+
+4. Create log directory
+    ```sh
+    $ mkdir log
     ```
 
 # 🎧 Usage

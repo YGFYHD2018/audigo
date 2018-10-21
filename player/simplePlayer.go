@@ -41,7 +41,10 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 		close(playing)
 	}))
 	// play sound
-	p.makeOtoPlayer(format.SampleRate, format.SampleRate.N(time.Millisecond*CHUNK))
+	if err := p.makeOtoPlayer(format.SampleRate, format.SampleRate.N(time.Millisecond*CHUNK)); err != nil {
+		log.Warn("dont create oto player: %s", err.Error())
+		return
+	}
 	p.mixer = p.makeMixer()
 	p.mixer.Play(s)
 	<-playing
