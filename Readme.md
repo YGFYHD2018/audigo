@@ -24,12 +24,14 @@
 1. Goto GOPATH  
     **WIndows**
     ```sh
-    $ cd %GOPATH%/go
+    $ cd %GOPATH%
     ```
 
     **Others**
     ```sh
     $ cd $HOME/go
+     or
+    $ cd $GOPATH
     ```
 
 2. Get src
@@ -47,33 +49,24 @@
 # 🎧 Usage
 Start audio service.
 ```sh
-$ audigo 80
+$ audigo
 ```
 
 ## 🔨 Options
 
 ### port
-add port number. default port 8080
+add port number. default port 80
 
     ```sh
     Listening port 5701
     $ audigo 5701
 
-    Listening port 80
-    $ audigo 80
-
     Listening port 8080
+    $ audigo 8080
+
+    Listening port 80
     $ audigo
     ```
-
-### repl mode
-start repl mode and current directory
-
-    ```sh
-    for Windows
-    $ audigo -r -cd %CD%
-    ```
-
 
 ## 📖 help
 ```sh
@@ -81,21 +74,25 @@ NAME:
    audigo - Audio service by LED CUBU
 
 USAGE:
-   audigo.exe [global options] [command] [command options] [arguments...]
+   audigo.exe [global options] command [command options] [arguments...]
 
 VERSION:
    1.0.0
 
 COMMANDS:
-     help, h  Shows a list of commands or help for one command
+     server, s  Instant server mode. (default)
+     client, c  Instant client REPL mode.
+     repl, r    Instant local REPL mode.
+     help, h    Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --server, -s   Instant server mode.
-   --client, -c   Instant client mode.
-   --repl, -r     Instant REPL mode.
    --cd value     change current directory by repl
    --help, -h     show help
    --version, -v  print the version
+
+client OPTIONS:
+   --cd value                change current directory by repl
+   --domain value, -d value  set request domain url by client (default: "http://audigo.local")
 ```
 
 ## 📂 Directory layout
@@ -104,7 +101,7 @@ Add sound file in audigo/asset/audio
 
 ```sh
 audigo
- |-- audigo.go
+ |-- audigo
  |-- asset
       |-- audio
            |-- bgm_wave.wav
