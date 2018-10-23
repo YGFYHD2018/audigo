@@ -5,9 +5,9 @@
 * [💊 Requirements](#-requirements)
 * [📌 Installing](#-installing)
 * [🎧 Usage](#-usage)
-* [🌏 REST Api](#-rest-api)
+* [🌏 REST Api](#️-rest-api)
 * [🎃 Notes](#-notes)
-* [🎤 Third party](#-thirdparty)
+* [🎤 Third party](#-third-party)
 <!-- tocstop -->  
 
 # Getting Started
