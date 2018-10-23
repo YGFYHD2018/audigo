@@ -2,11 +2,12 @@
 3D Led CubeのPCレス(Raspberry pi)音響サービス  
 
 <!-- toc -->  
-* [💊  Requirements](#-requirements)
+* [💊 Requirements](#-requirements)
 * [📌 Installing](#-installing)
-* [🎧  Usage](#-usage)
-* [🌏  REST Api](#-rest-api)
-* [🎃  Notes](#-notes)
+* [🎧 Usage](#-usage)
+* [🌏 REST Api](#-rest-api)
+* [🎃 Notes](#-notes)
+* [🎤 Third party](#-thirdparty)
 <!-- tocstop -->  
 
 # Getting Started
@@ -43,8 +44,8 @@ $ sudo apt install libasound2-dev
 
 2. Get src
     ```sh
-    $ git clone https://github.com/YGFYHD2018/audigo.git ./src/github.com/YGFYHD2018/audigo
-    $ cd ./src/github.com/YGFYHD2018/audigo
+    $ git clone https://github.com/YGFYHD2018/audigo.git ./src/github.com/code560/audigo
+    $ cd ./src/github.com/code560/audigo
     $ dep ensure
     ```
 
@@ -143,6 +144,23 @@ audigo
 | Windows (7, 10 or Later)       | -   | ✓     |
 | Rasbian (STRETCH or Later)     | ✓  | -      |
 | OSX (10.14 or Later)           | -   | ✓     |
+
+
+# 🎤 THIRD PARTY
+
+Use libs
+* [faiface/beep](https://github.com/faiface/beep)
+* [gin-gonic/gin](https://github.com/gin-gonic/gin)
+* [hajimehoshi/oto](https://github.com/hajimehoshi/oto)
+* [urfave/cli](https://github.com/urfave/cli)
+* [go.uber.org/zap](https://github.com/uber-go/zap)
+* [golang.org/x/crypto](https://github.com/golang/crypto/)
+
+
+音声ファイルを使用させていただいております。
+* [効果音ラボ](https://soundeffect-lab.info)  
+* [あみたろの声素材工房](http://www14.big.or.jp/~amiami/happy/)
+
 
 
 以上  
