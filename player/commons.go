@@ -150,6 +150,8 @@ func (p *playerMaker) sampling() {
 	p.mixer.Stream(p.samples)
 	p.streaMutex.Unlock()
 
+	// log.Debugf("*** do player.sampling()")
+
 	for s := range p.samples {
 		for rl := range p.samples[s] {
 			val := p.samples[s][rl]

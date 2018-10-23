@@ -22,7 +22,7 @@ func main() {
 
 	cl.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:  "cd",
+			Name:  "cd, c",
 			Usage: "change current directory by repl",
 			Value: "",
 		},
@@ -91,7 +91,6 @@ func cd(dir string) {
 	if dir != "" {
 		stat, _ := os.Stat(dir)
 		if stat.IsDir() {
-			// if os.IsExist(err) {
 			os.Chdir(dir)
 			log.Debugf("change current directory: %s", dir)
 		}

@@ -67,6 +67,10 @@ func (c *Closing) GetDo() chan<- struct{} {
 	return c.done
 }
 
+func (c *Closing) IsDone() bool {
+	return IsDone(c.done)
+}
+
 func IsDone(c <-chan struct{}) bool {
 	select {
 	case <-c:

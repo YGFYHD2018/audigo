@@ -2,9 +2,39 @@ package app
 
 import (
 	"github.com/code560/audigo/net"
+	"github.com/code560/audigo/player"
 )
+
+type voice int
+
+const (
+	_ voice = iota
+	start
+	finish
+)
+
+var sePlayer player.Player
+
+func init() {
+	sePlayer = player.NewInternalPlayer()
+}
 
 func Serve(port string) {
 	r := net.NewRouter()
+	se(start)
 	r.Run(port)
+	se(finish)
+}
+
+func se(v voice) {
+	var sound string
+	switch v {
+	case start:
+		sound = "okaerigoshujin_01.wav"
+	case finish:
+		sound = "rusuden_04-2.wav"
+	default:
+		return
+	}
+	sePlayer.Play(&player.PlayArgs{Src: sound}) // blocking
 }

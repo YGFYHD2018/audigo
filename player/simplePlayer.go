@@ -39,16 +39,18 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 	s = beep.Seq(s, beep.Callback(func() {
 		p.Stop(nil)
 		p.oto.Close()
+		// log.Debugf("*** call oto.Close()")
 		close(playing)
 	}))
 	// play sound
+	p.mixer = p.makeMixer()
 	if err := p.makeOtoPlayer(format.SampleRate, format.SampleRate.N(time.Millisecond*CHUNK)); err != nil {
 		log.Warnf("dont create oto player: %s", err.Error())
 		return
 	}
-	p.mixer = p.makeMixer()
 	p.mixer.Play(s)
 	<-playing
+	// log.Debugf("*** finished play")
 }
 
 func (p *simplePlayer) Volume(args *VolumeArgs) {
