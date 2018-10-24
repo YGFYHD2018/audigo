@@ -1,0 +1,11 @@
+[Unit]
+Description=Audigo service
+ConditionPathExists=/home/pi/go/src/github.com/code560/audigo
+
+[Service]
+Type=simple
+ExecStart=/home/pi/go/src/github.com/code560/audigo/audigo
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

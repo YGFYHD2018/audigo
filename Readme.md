@@ -59,6 +59,20 @@ $ sudo apt install libasound2-dev
     $ mkdir log
     ```
 
+5. Startup  
+    Create service file.  
+    ```sh
+    $ sudo cp install/audigo.service /etc/systemd/system/.
+    ```
+  
+    Enable service.  
+    ```sh
+    $ cd /etc/systemd/system
+    $ sudo systemctl enable audigo.service
+    $ sudo systemctl status audigo.service
+    ```
+
+
 # 🎧 Usage
 Start audio service.  
 ```sh
