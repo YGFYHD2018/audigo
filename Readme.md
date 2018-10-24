@@ -69,7 +69,10 @@ $ sudo apt install libasound2-dev
     ```sh
     $ cd /etc/systemd/system
     $ sudo systemctl enable audigo.service
+
+    Check service state
     $ sudo systemctl status audigo.service
+    $ sudo systemctl list-dependencies
     ```
 
 
