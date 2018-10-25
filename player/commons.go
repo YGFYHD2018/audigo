@@ -133,6 +133,11 @@ func (p *playerMaker) sampling(s beep.StreamSeeker) {
 		n, _ := p.mixer.Stream(p.samples)
 		p.streaMutex.Unlock()
 		pos += n
+
+		if p.close.IsDone() {
+			return
+		}
+
 		// write buffer
 		for s := range p.samples {
 			for rl := range p.samples[s] {
@@ -151,6 +156,10 @@ func (p *playerMaker) sampling(s beep.StreamSeeker) {
 			}
 		}
 		p.oto.Write(p.buf)
+
+		if p.close.IsDone() {
+			return
+		}
 	}
 }
 
