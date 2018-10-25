@@ -78,25 +78,25 @@ func (l *logger) Debug(v ...interface{}) string {
 
 func (l *logger) Info(v ...interface{}) string {
 	msg := fmt.Sprintln(v...)
-	l.zap.Info(fmt.Sprintln(v...))
+	l.zap.Info(msg)
 	return msg
 }
 
 func (l *logger) Warn(v ...interface{}) string {
 	msg := fmt.Sprintln(v...)
-	l.zap.Warn(fmt.Sprintln(v...))
+	l.zap.Warn(msg)
 	return msg
 }
 
 func (l *logger) Error(v ...interface{}) string {
 	msg := fmt.Sprintln(v...)
-	l.zap.Error(fmt.Sprintln(v...))
+	l.zap.Error(msg)
 	return msg
 }
 
 func (l *logger) Fatal(v ...interface{}) string {
 	msg := fmt.Sprintln(v...)
-	l.zap.Fatal(fmt.Sprintln(v...))
+	l.zap.Fatal(msg)
 	return msg
 }
 

@@ -119,56 +119,39 @@ func (p *playerMaker) makeOtoPlayer(sampleRate beep.SampleRate, bufferSize int) 
 	}
 	p.samples = make([][CH]float64, bufferSize)
 	p.buf = make([]byte, bufferNum)
-
-	go func(close <-chan struct{}) {
-		for {
-			select {
-			case <-close:
-				log.Info("closing player")
-				return
-			default:
-				// p.sampling()
-				if err := util.Recove(func() error {
-					p.sampling()
-					return nil
-				}); err != nil {
-					log.Warn("error sampling and close play")
-					return
-				}
-			}
-		}
-	}(p.close.GetDone())
 	return nil
 }
 
-func (p *playerMaker) sampling() {
-	p.streaMutex.Lock()
-	if p.samples == nil {
-		p.streaMutex.Unlock()
-		return
-	}
-	p.mixer.Stream(p.samples)
-	p.streaMutex.Unlock()
-
-	// log.Debugf("*** do player.sampling()")
-
-	for s := range p.samples {
-		for rl := range p.samples[s] {
-			val := p.samples[s][rl]
-			if val < -1 {
-				val = -1
-			}
-			if val > +1 {
-				val = +1
-			}
-			i16 := int16(val * (1<<15 - 1))
-			l := byte(i16)
-			h := byte(i16 >> 8)
-			p.buf[s*4+rl*2+0] = l
-			p.buf[s*4+rl*2+1] = h
+func (p *playerMaker) sampling(s beep.StreamSeeker) {
+	for pos, len := s.Position(), s.Len(); pos < len; {
+		// read stream
+		p.streaMutex.Lock()
+		if p.samples == nil {
+			p.streaMutex.Unlock()
+			return
 		}
+		n, _ := p.mixer.Stream(p.samples)
+		p.streaMutex.Unlock()
+		pos += n
+		// write buffer
+		for s := range p.samples {
+			for rl := range p.samples[s] {
+				val := p.samples[s][rl]
+				if val < -1 {
+					val = -1
+				}
+				if val > +1 {
+					val = +1
+				}
+				i16 := int16(val * (1<<15 - 1))
+				l := byte(i16)
+				h := byte(i16 >> 8)
+				p.buf[s*4+rl*2+0] = l
+				p.buf[s*4+rl*2+1] = h
+			}
+		}
+		p.oto.Write(p.buf)
 	}
-	p.oto.Write(p.buf)
 }
 
 func (p *playerMaker) setCtrlStream(s beep.Streamer) beep.Streamer {
