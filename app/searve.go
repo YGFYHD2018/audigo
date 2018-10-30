@@ -15,10 +15,6 @@ const (
 
 var sePlayer player.Player
 
-func init() {
-	sePlayer = player.NewInternalPlayer()
-}
-
 func Serve(port string) {
 	r := net.NewRouter()
 	se(start)
@@ -27,6 +23,7 @@ func Serve(port string) {
 }
 
 func se(v voice) {
+	sePlayer = player.NewInternalPlayer()
 	var sound string
 	switch v {
 	case start:
