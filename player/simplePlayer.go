@@ -2,7 +2,6 @@ package player
 
 import (
 	"os"
-	"time"
 
 	"github.com/faiface/beep"
 )
@@ -18,6 +17,8 @@ func newSimplePlayer() Player {
 }
 
 func (p *simplePlayer) Play(args *PlayArgs) {
+	// defer util.GetProfile().Stop()
+
 	// init
 	p.reset()
 	// and stop
@@ -36,7 +37,8 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 	s = p.setCtrlStream(s)
 	s = p.setVolumeStream(s)
 	p.mixer = p.makeMixer()
-	if err := p.makeOtoPlayer(format.SampleRate, format.SampleRate.N(time.Millisecond*CHUNK)); err != nil {
+	// if err := p.makeOtoPlayer(format.SampleRate, format.SampleRate.N(time.Millisecond*CHUNK)); err != nil {
+	if err := p.makeOtoPlayer(format.SampleRate, CHUNK_SIZE); err != nil {
 		log.Warnf("dont create oto player: %s", err.Error())
 		return
 	}

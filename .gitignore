@@ -1,4 +1,5 @@
 /vendor/*
+/.vendor/*
 /.vscode/*
 
 trace.out
@@ -6,5 +7,6 @@ trace.out
 debug
 debug.test
 *.log
+*.pprof
 
 audigo.exe

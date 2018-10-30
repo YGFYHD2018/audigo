@@ -25,9 +25,10 @@ var (
 // consts
 
 const (
-	CH    = 2
-	BPS   = 2
-	CHUNK = 100
+	CH         = 2
+	BPS        = 2
+	CHUNK      = 100
+	CHUNK_SIZE = 2048
 
 	VOLUME_BASE = 1.2
 	VOLUME_INIT = 1

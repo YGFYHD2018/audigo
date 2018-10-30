@@ -3,19 +3,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8528db314c42a7537446a28d50ee48e494a808338a81388b46382fef560f53e7"
-  name = "github.com/code560/audigo"
-  packages = [
-    "app",
-    "net",
-    "player",
-    "util",
-  ]
-  pruneopts = "UT"
-  revision = "1f8008eb453c139bb5de3bba0d31eb7a92e0457c"
-
-[[projects]]
-  branch = "master"
   digest = "1:4eb663d098f02c510f4f550cbcbbdef6ddb3ccbef7876bd6e12b5f934ae91fc8"
   name = "github.com/faiface/beep"
   packages = [
@@ -137,6 +124,14 @@
   pruneopts = "UT"
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
+
+[[projects]]
+  digest = "1:cfa0d7741863a0e1d30e0ccdd4b48a96a471cdb47892303de8b92c3713af3e77"
+  name = "github.com/pkg/profile"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5b67d428864e92711fcbd2f8629456121a56d91f"
+  version = "v1.2.1"
 
 [[projects]]
   digest = "1:03aa6e485e528acb119fb32901cf99582c380225fc7d5a02758e08b180cb56c3"
@@ -269,17 +264,13 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/code560/audigo/app",
-    "github.com/code560/audigo/net",
-    "github.com/code560/audigo/player",
-    "github.com/code560/audigo/util",
     "github.com/faiface/beep",
     "github.com/faiface/beep/effects",
     "github.com/faiface/beep/mp3",
     "github.com/faiface/beep/wav",
     "github.com/gin-gonic/gin",
     "github.com/hajimehoshi/oto",
-    "github.com/pkg/errors",
+    "github.com/pkg/profile",
     "github.com/urfave/cli",
     "go.uber.org/zap",
     "go.uber.org/zap/zapcore",
