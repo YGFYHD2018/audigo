@@ -27,7 +27,7 @@ func se(v voice) {
 	var sound string
 	switch v {
 	case start:
-		sound = "info-girl1-kidoushimashita1.mp3"
+		sound = "boyomi-chan_start.wav"
 	case finish:
 		sound = "rusuden_04-2.wav"
 	default:
