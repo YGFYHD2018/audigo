@@ -42,11 +42,12 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 		log.Warnf("dont create oto player: %s", err.Error())
 		return
 	}
-	p.mixer.Play(s)
+	defer p.oto.Close()
+
 	// play sound
+	p.mixer.Play(s)
 	p.sampling(closer) // blocking
 	p.Stop(nil)
-	p.oto.Close()
 }
 
 func (p *simplePlayer) Volume(args *VolumeArgs) {
