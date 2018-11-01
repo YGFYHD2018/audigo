@@ -1,6 +1,7 @@
 package player
 
 import (
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -140,20 +141,25 @@ func (p *playerMaker) sampling(s beep.StreamSeeker) {
 		}
 
 		// write buffer
+		var i16 int16
+		var l, h byte
+		var pos int
+		var val float64
 		for s := range p.samples {
 			for rl := range p.samples[s] {
-				val := p.samples[s][rl]
+				val = p.samples[s][rl]
 				if val < -1 {
 					val = -1
 				}
 				if val > +1 {
 					val = +1
 				}
-				i16 := int16(val * (1<<15 - 1))
-				l := byte(i16)
-				h := byte(i16 >> 8)
-				p.buf[s*4+rl*2+0] = l
-				p.buf[s*4+rl*2+1] = h
+				i16 = int16(val * math.MaxInt16)
+				l = byte(i16)
+				h = byte(i16 >> 8)
+				pos = s*4 + rl*2
+				p.buf[pos] = l
+				p.buf[pos+1] = h
 			}
 		}
 		p.oto.Write(p.buf)
