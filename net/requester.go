@@ -42,7 +42,7 @@ func NewRequester(domain string, id string) *Requester {
 	r := &Requester{
 		domain:     domain,
 		id:         id,
-		httpClient: new(http.Client),
+		httpClient: &http.Client{},
 		httpQueue:  make(chan interface{}, HTTPQUEUE_SIZE),
 	}
 	// r.initPool()

@@ -5,8 +5,7 @@ type internalPlayer struct {
 }
 
 func NewInternalPlayer() Player {
-	p := new(internalPlayer)
-	p.close = p.makeClosing()
+	p := &internalPlayer{}
 	return p
 }
 

@@ -2,7 +2,7 @@ package player
 
 type Player interface {
 	Play(args *PlayArgs)
-	Stop(callback chan<- struct{})
+	Stop()
 	Volume(args *VolumeArgs)
 	Pause()
 	Resume()
