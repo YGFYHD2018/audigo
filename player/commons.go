@@ -48,7 +48,7 @@ func loopCount(enable bool) int {
 // create
 
 type playerMaker struct {
-	close      *util.Closing
+	close      bool
 	streaMutex sync.Mutex
 
 	ctrl    *beep.Ctrl
@@ -61,14 +61,8 @@ type playerMaker struct {
 
 // interface methods
 
-func (p *playerMaker) Stop(callback chan<- struct{}) {
-	if p.close == nil {
-		return
-	}
-	p.close.Reset()
-	if callback != nil {
-		close(callback)
-	}
+func (p *playerMaker) Stop() {
+	p.close = true
 }
 
 func (p *playerMaker) Volume(args *VolumeArgs) {
@@ -95,11 +89,11 @@ func (p *playerMaker) Resume() {
 // maker methods
 
 func (p *playerMaker) makeMixer() *beep.Mixer {
-	return new(beep.Mixer)
+	return &beep.Mixer{}
 }
 
 func (p *playerMaker) makeCtrl() *beep.Ctrl {
-	return new(beep.Ctrl)
+	return &beep.Ctrl{}
 }
 
 func (p *playerMaker) makeVolume() *effects.Volume {
@@ -136,7 +130,7 @@ func (p *playerMaker) sampling(s beep.StreamSeeker) {
 		p.streaMutex.Unlock()
 		pos += n
 
-		if p.close.IsDone() {
+		if p.close {
 			return
 		}
 
@@ -164,7 +158,7 @@ func (p *playerMaker) sampling(s beep.StreamSeeker) {
 		}
 		p.oto.Write(p.buf)
 
-		if p.close.IsDone() {
+		if p.close {
 			return
 		}
 	}

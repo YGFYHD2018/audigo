@@ -67,7 +67,7 @@ func (p *simpleProxy) call(arg *Action) {
 	case Stop:
 		p.playLock(func() {
 			for _, player := range p.plays {
-				go player.Stop(nil)
+				go player.Stop()
 			}
 		})
 	case Pause:

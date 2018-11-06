@@ -11,14 +11,11 @@ type simplePlayer struct {
 }
 
 func newSimplePlayer() Player {
-	p := new(simplePlayer)
-	p.close = p.makeClosing()
+	p := &simplePlayer{}
 	return p
 }
 
 func (p *simplePlayer) Play(args *PlayArgs) {
-	// defer util.GetProfile().Stop()
-
 	// init
 	p.reset()
 	// and stop
@@ -47,7 +44,7 @@ func (p *simplePlayer) Play(args *PlayArgs) {
 	// play sound
 	p.mixer.Play(s)
 	p.sampling(closer) // blocking
-	p.Stop(nil)
+	p.Stop()
 }
 
 func (p *simplePlayer) Volume(args *VolumeArgs) {
@@ -72,7 +69,7 @@ func (p *simplePlayer) Resume() {
 }
 
 func (p *simplePlayer) reset() {
-	p.close = p.makeClosing()
+	p.close = false
 
 	p.streaMutex.Lock()
 	p.ctrl = nil
