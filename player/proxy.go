@@ -81,24 +81,24 @@ func (p *simpleProxy) call(arg *Action) {
 			}
 		})
 	case Pause:
+		p.playerCtrl.Paused = true
 		p.playLock(func() {
 			for _, player := range p.plays {
-				p.playerCtrl.Paused = true
 				go player.Pause()
 			}
 		})
 	case Resume:
+		p.playerCtrl.Paused = false
 		p.playLock(func() {
 			for _, player := range p.plays {
-				p.playerCtrl.Paused = false
 				go player.Resume()
 			}
 		})
 	case Volume:
 		a := arg.Args.(*VolumeArgs)
+		p.volume(a)
 		p.playLock(func() {
 			for _, player := range p.plays {
-				p.volume(a)
 				go player.Volume(a)
 			}
 		})
