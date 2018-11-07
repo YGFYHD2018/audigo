@@ -1,11 +1,23 @@
 package player
 
+import (
+	"github.com/faiface/beep"
+	"github.com/faiface/beep/effects"
+)
+
 type Player interface {
 	Play(args *PlayArgs)
 	Stop()
 	Volume(args *VolumeArgs)
 	Pause()
 	Resume()
+}
+
+type implPlayer interface {
+	Player
+
+	setCtrlFactory(func() *beep.Ctrl)
+	setVolumeFactory(func() *effects.Volume)
 }
 
 type PlayArgs struct {

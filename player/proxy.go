@@ -3,6 +3,9 @@ package player
 import (
 	"sync"
 
+	"github.com/faiface/beep"
+	"github.com/faiface/beep/effects"
+
 	"github.com/code560/audigo/util"
 )
 
@@ -17,6 +20,9 @@ type simpleProxy struct {
 
 	plays   map[int]Player
 	playMtx sync.Mutex
+
+	playerCtrl *beep.Ctrl
+	playerVol  *effects.Volume
 }
 
 // NewProxy は、Playerを生成して返します。
@@ -26,6 +32,9 @@ func newSimpleProxy() Proxy {
 		closing: make(chan struct{}),
 
 		plays: make(map[int]Player, 32),
+
+		playerCtrl: makeCtrl(),
+		playerVol:  makeVolume(),
 	}
 	go p.work()
 	return p
@@ -54,6 +63,7 @@ func (p *simpleProxy) call(arg *Action) {
 		a.Src = dir + a.Src
 		go func(p *simpleProxy, a *PlayArgs) {
 			player := p.playerPool.Get().(Player)
+			p.setFactory(player)
 			var i int
 			p.playLock(func() {
 				i = p.pushPlayer(player)
@@ -73,12 +83,14 @@ func (p *simpleProxy) call(arg *Action) {
 	case Pause:
 		p.playLock(func() {
 			for _, player := range p.plays {
+				p.playerCtrl.Paused = true
 				go player.Pause()
 			}
 		})
 	case Resume:
 		p.playLock(func() {
 			for _, player := range p.plays {
+				p.playerCtrl.Paused = false
 				go player.Resume()
 			}
 		})
@@ -86,6 +98,7 @@ func (p *simpleProxy) call(arg *Action) {
 		a := arg.Args.(*VolumeArgs)
 		p.playLock(func() {
 			for _, player := range p.plays {
+				p.volume(a)
 				go player.Volume(a)
 			}
 		})
@@ -124,4 +137,36 @@ func (p *simpleProxy) popPlayer(i int) {
 
 func isDone(c chan struct{}) bool {
 	return util.IsDone(c)
+}
+
+func (p *simpleProxy) volume(args *VolumeArgs) {
+	if args.Vol == 0 {
+		p.playerVol.Silent = true
+	} else {
+		p.playerVol.Silent = false
+	}
+	p.playerVol.Volume = args.Vol
+}
+
+func (p *simpleProxy) setFactory(player interface{}) {
+	impl, ok := player.(implPlayer)
+	if !ok {
+		return
+	}
+
+	ctrl := p.playerCtrl
+	impl.setCtrlFactory(func() *beep.Ctrl {
+		c := makeCtrl()
+		c.Paused = ctrl.Paused
+		return c
+	})
+
+	vol := p.playerVol
+	impl.setVolumeFactory(func() *effects.Volume {
+		v := makeVolume()
+		v.Base = vol.Base
+		v.Silent = vol.Silent
+		v.Volume = vol.Volume
+		return v
+	})
 }

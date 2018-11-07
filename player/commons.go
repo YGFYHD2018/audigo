@@ -48,8 +48,10 @@ func loopCount(enable bool) int {
 // create
 
 type playerMaker struct {
-	close      bool
-	streaMutex sync.Mutex
+	close         bool
+	streaMutex    sync.Mutex
+	ctrlFactory   func() *beep.Ctrl
+	volumeFactory func() *effects.Volume
 
 	ctrl    *beep.Ctrl
 	vol     *effects.Volume
@@ -93,10 +95,26 @@ func (p *playerMaker) makeMixer() *beep.Mixer {
 }
 
 func (p *playerMaker) makeCtrl() *beep.Ctrl {
+	if p.ctrlFactory != nil {
+		return p.ctrlFactory()
+	} else {
+		return makeCtrl()
+	}
+}
+
+func makeCtrl() *beep.Ctrl {
 	return &beep.Ctrl{}
 }
 
 func (p *playerMaker) makeVolume() *effects.Volume {
+	if p.volumeFactory != nil {
+		return p.volumeFactory()
+	} else {
+		return makeVolume()
+	}
+}
+
+func makeVolume() *effects.Volume {
 	return &effects.Volume{Base: VOLUME_BASE, Volume: VOLUME_INIT}
 }
 
@@ -178,6 +196,14 @@ func (p *playerMaker) setVolumeStream(s beep.Streamer) beep.Streamer {
 	}
 	p.vol.Streamer = s
 	return p.vol
+}
+
+func (p *playerMaker) setCtrlFactory(f func() *beep.Ctrl) {
+	p.ctrlFactory = f
+}
+
+func (p *playerMaker) setVolumeFactory(f func() *effects.Volume) {
+	p.volumeFactory = f
 }
 
 func (p *playerMaker) openFile(src string) (beep.StreamSeekCloser, *beep.Format) {
