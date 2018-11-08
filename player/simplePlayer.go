@@ -71,12 +71,12 @@ func (p *simplePlayer) Resume() {
 func (p *simplePlayer) reset() {
 	p.close = false
 
-	p.streaMutex.Lock()
+	p.storeMutex.Lock()
 	p.ctrl = nil
 	p.vol = nil
 	p.mixer = nil
 	p.oto = nil
 	p.samples = nil
 	p.buf = nil
-	p.streaMutex.Unlock()
+	p.storeMutex.Unlock()
 }

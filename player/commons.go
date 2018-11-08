@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
@@ -49,7 +50,7 @@ func loopCount(enable bool) int {
 
 type playerMaker struct {
 	close         bool
-	streaMutex    sync.Mutex
+	storeMutex    sync.Mutex
 	ctrlFactory   func() *beep.Ctrl
 	volumeFactory func() *effects.Volume
 
@@ -139,13 +140,19 @@ func (p *playerMaker) makeOtoPlayer(sampleRate beep.SampleRate, bufferSize int) 
 func (p *playerMaker) sampling(s beep.StreamSeeker) {
 	for pos, len := s.Position(), s.Len(); pos < len; {
 		// read stream
-		p.streaMutex.Lock()
+		p.storeMutex.Lock()
 		if p.samples == nil {
-			p.streaMutex.Unlock()
+			p.storeMutex.Unlock()
 			return
 		}
+		for p.ctrl != nil && p.ctrl.Paused {
+			time.Sleep(time.Millisecond * 100)
+			if p.close {
+				return
+			}
+		}
 		n, _ := p.mixer.Stream(p.samples)
-		p.streaMutex.Unlock()
+		p.storeMutex.Unlock()
 		pos += n
 
 		if p.close {
@@ -175,10 +182,6 @@ func (p *playerMaker) sampling(s beep.StreamSeeker) {
 			}
 		}
 		p.oto.Write(p.buf)
-
-		if p.close {
-			return
-		}
 	}
 }
 
