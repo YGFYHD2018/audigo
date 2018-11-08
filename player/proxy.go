@@ -3,7 +3,6 @@ package player
 import (
 	"sync"
 
-	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
 
 	"github.com/code560/audigo/util"
@@ -21,7 +20,7 @@ type simpleProxy struct {
 	plays   map[int]Player
 	playMtx sync.Mutex
 
-	playerCtrl *beep.Ctrl
+	playerCtrl *ctrler
 	playerVol  *effects.Volume
 }
 
@@ -155,7 +154,7 @@ func (p *simpleProxy) setFactory(player interface{}) {
 	}
 
 	ctrl := p.playerCtrl
-	impl.setCtrlFactory(func() *beep.Ctrl {
+	impl.setCtrlFactory(func() *ctrler {
 		c := makeCtrl()
 		c.Paused = ctrl.Paused
 		return c

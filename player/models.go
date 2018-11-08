@@ -1,7 +1,6 @@
 package player
 
 import (
-	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
 )
 
@@ -16,7 +15,7 @@ type Player interface {
 type implPlayer interface {
 	Player
 
-	setCtrlFactory(func() *beep.Ctrl)
+	setCtrlFactory(func() *ctrler)
 	setVolumeFactory(func() *effects.Volume)
 }
 
@@ -53,3 +52,7 @@ const (
 	Pause
 	Resume
 )
+
+type ctrler struct {
+	Paused bool
+}

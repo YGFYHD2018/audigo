@@ -51,10 +51,10 @@ func loopCount(enable bool) int {
 type playerMaker struct {
 	close         bool
 	storeMutex    sync.Mutex
-	ctrlFactory   func() *beep.Ctrl
+	ctrlFactory   func() *ctrler
 	volumeFactory func() *effects.Volume
 
-	ctrl    *beep.Ctrl
+	ctrl    *ctrler
 	vol     *effects.Volume
 	mixer   *beep.Mixer
 	oto     *oto.Player
@@ -95,7 +95,7 @@ func (p *playerMaker) makeMixer() *beep.Mixer {
 	return &beep.Mixer{}
 }
 
-func (p *playerMaker) makeCtrl() *beep.Ctrl {
+func (p *playerMaker) makeCtrl() *ctrler {
 	if p.ctrlFactory != nil {
 		return p.ctrlFactory()
 	} else {
@@ -103,8 +103,8 @@ func (p *playerMaker) makeCtrl() *beep.Ctrl {
 	}
 }
 
-func makeCtrl() *beep.Ctrl {
-	return &beep.Ctrl{}
+func makeCtrl() *ctrler {
+	return &ctrler{}
 }
 
 func (p *playerMaker) makeVolume() *effects.Volume {
@@ -189,8 +189,7 @@ func (p *playerMaker) setCtrlStream(s beep.Streamer) beep.Streamer {
 	if p.ctrl == nil {
 		p.ctrl = p.makeCtrl()
 	}
-	p.ctrl.Streamer = s
-	return p.ctrl
+	return s
 }
 
 func (p *playerMaker) setVolumeStream(s beep.Streamer) beep.Streamer {
@@ -201,7 +200,7 @@ func (p *playerMaker) setVolumeStream(s beep.Streamer) beep.Streamer {
 	return p.vol
 }
 
-func (p *playerMaker) setCtrlFactory(f func() *beep.Ctrl) {
+func (p *playerMaker) setCtrlFactory(f func() *ctrler) {
 	p.ctrlFactory = f
 }
 
