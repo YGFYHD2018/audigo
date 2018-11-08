@@ -39,7 +39,7 @@ func TestPlayer(t *testing.T) {
 	time.Sleep(time.Second * sec)
 	for _, p := range plist {
 		log.Debug("call stop sound")
-		p.Stop(nil)
+		p.Stop()
 	}
 
 	l.Debug("done routines")
@@ -49,7 +49,7 @@ func TestUnexpectedSound(t *testing.T) {
 	loop := 10
 	p := newSimplePlayer()
 	for i := 0; i < loop; i++ {
-		p.Stop(nil)
+		p.Stop()
 	}
 	for i := 0; i < loop; i++ {
 		p.Pause()
