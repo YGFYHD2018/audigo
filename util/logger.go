@@ -43,11 +43,7 @@ func newLogger() Log {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	console := zapcore.NewCore(
-		zapcore.NewConsoleEncoder(conf),
-		zapcore.AddSync(os.Stdout),
-		zapcore.DebugLevel,
-	)
+	console := newConsoleLogger(conf)
 	file := newFileLogger("log/audigo.log", conf)
 	l := zap.New(zapcore.NewTee(
 		console,
@@ -56,8 +52,17 @@ func newLogger() Log {
 	return &logger{l}
 }
 
+func newConsoleLogger(conf zapcore.EncoderConfig) zapcore.Core {
+	return zapcore.NewCore(
+		zapcore.NewConsoleEncoder(conf),
+		zapcore.AddSync(os.Stdout),
+		zapcore.DebugLevel,
+	)
+}
+
 func newFileLogger(path string, conf zapcore.EncoderConfig) zapcore.Core {
-	f, _ := os.Create(path)
+	flag := os.O_WRONLY | os.O_CREATE | os.O_APPEND
+	f, _ := os.OpenFile(path, flag, 0666)
 	fileCore := zapcore.NewCore(
 		zapcore.NewJSONEncoder(conf),
 		zapcore.AddSync(f),
