@@ -61,8 +61,12 @@ func newConsoleLogger(conf zapcore.EncoderConfig) zapcore.Core {
 }
 
 func newFileLogger(path string, conf zapcore.EncoderConfig) zapcore.Core {
+	conf.EncodeLevel = zapcore.LowercaseLevelEncoder
+	conf.MessageKey = "log"
+
 	flag := os.O_WRONLY | os.O_CREATE | os.O_APPEND
 	f, _ := os.OpenFile(path, flag, 0666)
+
 	fileCore := zapcore.NewCore(
 		zapcore.NewJSONEncoder(conf),
 		zapcore.AddSync(f),
